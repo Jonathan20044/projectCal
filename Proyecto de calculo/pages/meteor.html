@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Meteor Dash - Arcade Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/meteor.css">
+</head>
+<body>
+  <!-- Start Overlay -->
+  <div id="start-overlay" class="modal-overlay is-visible">
+    <div class="start-message">
+      <i class='bx bx-pointer bx-tada'></i>
+      <p>Toca o haz clic para iniciar</p>
+    </div>
+  </div>
+
+
+  <!-- Question Modal -->
+  <div id="question-modal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-icon-wrap danger">
+        <i class='bx bxs-error'></i>
+      </div>
+      <h2>¡Impacto Detectado!</h2>
+      <p>Tu nave ha sido destruida. Responde para recuperarla.</p>
+      <a class="modal-btn danger-btn" href="questions.html?source=meteor">Reparar &amp; Reintentar</a>
+    </div>
+  </div>
+
+  <canvas id="game-canvas"></canvas>
+
+  <div id="hud">
+    <div id="score-box">⏱️ <span id="score">0</span></div>
+    <div id="level-box">Nivel <span id="level">1</span></div>
+  </div>
+
+  <script src="../js/meteor.js"></script>
+</body>
+</html>

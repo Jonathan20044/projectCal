@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pregunta Matemática - Arcade Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/menu.css">
+  <link rel="stylesheet" href="../css/questions.css">
+</head>
+<body>
+  <!-- Animated background from menu -->
+  <div class="bg-shapes">
+    <div class="shape blob1"></div>
+    <div class="shape blob2"></div>
+    <div class="shape blob3"></div>
+  </div>
+  <div class="particles"></div>
+
+  <main class="page-container glass-card">
+    <header class="q-header">
+      <div class="icon-wrap"><i class='bx bx-brain'></i></div>
+      <h1 class="glitch-color">Desafío Matemático</h1>
+      <p class="subtitle">Resuelve esta breve operación para definir tu destino.</p>
+    </header>
+
+    <form class="question-form" id="question-form">
+      <fieldset class="question-container" id="dynamic-question-container">
+        <!-- Question injected by JS -->
+      </fieldset>
+
+      <button type="submit" class="play-btn submit-btn" id="submit-btn">
+        Verificar Respuesta
+      </button>
+    </form>
+
+    <div id="result" class="result" hidden>
+      <div class="result-icon" id="result-icon"></div>
+      <h2 id="result-title"></h2>
+      <p id="result-message"></p>
+      
+      <div id="procedure-box" class="procedure-box" hidden>
+        <h3>Procedimiento:</h3>
+        <p id="procedure-text"></p>
+      </div>
+
+      <div class="result-actions">
+        <button type="button" id="continue-btn" class="play-btn">
+          Continuar <i class='bx bx-right-arrow-alt'></i>
+        </button>
+      </div>
+    </div>
+  </main>
+  
+  <script src="../js/questions.js"></script>
+</body>
+</html>

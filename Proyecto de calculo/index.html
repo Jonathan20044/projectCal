@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Game Hub - Menú Principal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/menu.css">
+</head>
+
+<body>
+  <!-- Animated background -->
+  <div class="bg-shapes">
+    <div class="shape blob1"></div>
+    <div class="shape blob2"></div>
+    <div class="shape blob3"></div>
+  </div>
+  <div class="particles"></div>
+
+  <main class="menu-container">
+    <header class="logo-holder">
+      <h1 class="logo">
+        <span class="glitch" data-text="ARCADE">ARCADE</span>
+        <span class="glitch-color">HUB</span>
+      </h1>
+      <p class="hint">Selecciona un juego para iniciar la partida</p>
+    </header>
+
+    <div class="game-grid">
+      <a href="pages/pacman.html" class="game-card" style="--accent: #FFD700;"
+         data-title="Pacman" data-icon="bxs-ghost"
+         data-pc="Usa las <b>Flechas Direccionales</b> de tu teclado para mover a Pacman por el laberinto."
+         data-mobile="<b>Desliza tu dedo</b> (Swipe) por la pantalla en la dirección a la que quieras ir.">
+        <div class="card-inner">
+          <div class="icon-placeholder">
+            <i class='bx bxs-ghost'></i>
+          </div>
+          <h2>Pacman</h2>
+          <p>El clásico arcade de laberintos</p>
+        </div>
+      </a>
+      
+      <a href="pages/flappyDino.html" class="game-card" style="--accent: #00FF66;"
+         data-title="Flappy Dino" data-icon="bx-run"
+         data-pc="Haz clic con el ratón o presiona la <b>barra espaciadora</b> para hacer volar al personaje."
+         data-mobile="<b>Toca la pantalla</b> repetidamente para saltar en el aire.">
+        <div class="card-inner">
+          <div class="icon-placeholder">
+            <i class='bx bx-run'></i>
+          </div>
+          <h2>Flappy Dino</h2>
+          <p>Desafío y reflejos en el aire</p>
+        </div>
+      </a>
+      
+      <a href="pages/stickHero.html" class="game-card" style="--accent: #00E5FF;"
+         data-title="Stick Hero" data-icon="bx-ruler"
+         data-pc="<b>Mantén el clic izquierdo</b> presionado para extender el puente y suelta para dejarlo caer sobre la plataforma."
+         data-mobile="<b>Manten el dedo pulsado</b> en la pantalla para hacer crecer el puento y suéltalo para caer a la distancia correcta.">
+        <div class="card-inner">
+          <div class="icon-placeholder">
+            <i class='bx bx-ruler'></i>
+          </div>
+          <h2>Stick Hero</h2>
+          <p>Calcula la distancia perfecta</p>
+        </div>
+      </a>
+      
+      <a href="pages/coloron.html" class="game-card" style="--accent: #FF0055;"
+         data-title="Coloron" data-icon="bxs-palette"
+         data-pc="Realiza <b>clic izquierdo</b> en la pantalla para cambiar el color de la barra antes de que la pelota rebote."
+         data-mobile="<b>Toca la pantalla</b> rápidamente para rotar el color y evitar perder la partida.">
+        <div class="card-inner">
+          <div class="icon-placeholder">
+            <i class='bx bxs-palette'></i>
+          </div>
+          <h2>Coloron</h2>
+          <p>Rebota y combina los colores</p>
+        </div>
+      </a>
+      <a href="pages/meteor.html" class="game-card" style="--accent: #00E5FF;"
+         data-title="Meteor Dash" data-icon="bxs-planet"
+         data-pc="Usa las <b>Flechas Izquierda / Derecha</b> del teclado para esquivar los meteoros."
+         data-mobile="<b>Toca y arrastra</b> a izquierda o derecha para mover la nave y evitar ser impactado.">
+        <div class="card-inner">
+          <div class="icon-placeholder">
+            <i class='bx bxs-planet'></i>
+          </div>
+          <h2>Meteor Dash</h2>
+          <p>Esquiva meteoros y sobrevive</p>
+        </div>
+      </a>
+
+      <a href="pages/neonbreaker.html" class="game-card" style="--accent: #FF66CC;"
+         data-title="Neon Breaker" data-icon="bx-shape-square"
+         data-pc="Mueve el <b>ratón</b> para controlar la paleta y mantener la pelota rebotando sobre los bloques."
+         data-mobile="<b>Desliza el dedo</b> horizontalmente para mover la paleta y destruir todos los bloques.">
+        <div class="card-inner">
+          <div class="icon-placeholder">
+            <i class='bx bx-shape-square'></i>
+          </div>
+          <h2>Neon Breaker</h2>
+          <p>Destruye bloques con la pelota</p>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <!-- Instructions Modal -->
+  <div id="instructions-modal" class="modal-overlay">
+    <div class="modal-card">
+      <button id="close-modal" class="close-btn"><i class='bx bx-x'></i></button>
+      
+      <div class="modal-header">
+        <div class="modal-icon-wrap" id="modal-accent" style="--accent: #fff;">
+          <i id="modal-icon" class="bx bxs-ghost"></i>
+        </div>
+        <h2 id="modal-title">Título Juego</h2>
+      </div>
+      
+      <div class="modal-body">
+        <div class="instruction-box">
+          <h3><i class='bx bx-laptop'></i> En PC</h3>
+          <p id="modal-pc-text">Instrucciones PC</p>
+        </div>
+        <div class="instruction-box">
+          <h3><i class='bx bx-mobile-alt'></i> En Celular</h3>
+          <p id="modal-mobile-text">Instrucciones Celular</p>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <a href="#" id="modal-play-btn" class="play-btn">
+          Jugar Ahora <i class='bx bx-play-circle'></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('instructions-modal');
+    const closeBtn = document.getElementById('close-modal');
+    const playBtn = document.getElementById('modal-play-btn');
+    
+    // Modal Elements to Update
+    const modalTitle = document.getElementById('modal-title');
+    const modalIcon = document.getElementById('modal-icon');
+    const modalAccent = document.getElementById('modal-accent');
+    const modalPcText = document.getElementById('modal-pc-text');
+    const modalMobileText = document.getElementById('modal-mobile-text');
+
+    // Make game cards summon the modal instead of navigating
+    document.querySelectorAll('.game-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        e.preventDefault(); 
+        
+        // Grab data-attributes
+        const title = card.getAttribute('data-title');
+        const iconClass = card.getAttribute('data-icon');
+        const pcText = card.getAttribute('data-pc');
+        const mobileText = card.getAttribute('data-mobile');
+        const href = card.getAttribute('href');
+        const accent = card.style.getPropertyValue('--accent');
+
+        // Apply data to modal
+        modalTitle.textContent = title;
+        modalIcon.className = `bx ${iconClass}`;
+        modalPcText.innerHTML = pcText;
+        modalMobileText.innerHTML = mobileText;
+        playBtn.href = href;
+        
+        // Set accent colors in modal dynamically
+        modalAccent.style.setProperty('--accent', accent);
+        playBtn.style.setProperty('--accent', accent);
+        
+        // Determine icons colors based on game roughly
+        const boxes = document.querySelectorAll('.instruction-box h3');
+        if(boxes.length > 0) boxes[0].style.color = '#00E5FF'; // PC
+        if(boxes.length > 1) boxes[1].style.color = '#FFD700'; // Mobile
+
+        // Show Modal
+        modal.classList.add('show');
+      });
+    });
+
+    const closeModalFn = () => modal.classList.remove('show');
+
+    closeBtn.addEventListener('click', closeModalFn);
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModalFn();
+    });
+  </script>
+</body>
+
+</html>

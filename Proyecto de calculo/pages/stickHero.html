@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Stick Hero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../css/stickHero.css">
+</head>
+<body>
+  <div class="container">
+    <div id="score"></div>
+    <canvas id="game" width="375" height="375"></canvas>
+    <div id="introduction">Mantén presionado el mouse para estirar el palo</div>
+    <div id="perfect">DOBLE PUNTUACIÓN</div>
+    <button id="restart">REINICIAR</button>
+    <div id="question-modal" class="modal-overlay" aria-hidden="true">
+      <div class="modal">
+        <h2>Debes responder unas preguntas.</h2>
+        <p>Responde 4 preguntas de matematica basica para continuar.</p>
+        <a class="modal-btn" href="questions.html?source=stickHero">Responder</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/stickHero.js"></script>
+</body>
+</html>

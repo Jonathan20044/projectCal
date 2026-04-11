@@ -1,0 +1,233 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  cursor: pointer;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+#score {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  font-size: 2em;
+  font-weight: 900;
+}
+
+#introduction {
+  width: 200px;
+  height: 150px;
+  position: absolute;
+  font-weight: 600;
+  font-size: 0.8em;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  transition: opacity 2s;
+}
+
+#restart {
+  width: 120px;
+  height: 120px;
+  position: absolute;
+  border-radius: 50%;
+  color: white;
+  background-color: red;
+  border: none;
+  font-weight: 700;
+  font-size: 1.2em;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  display: none;
+  cursor: pointer;
+}
+
+#perfect {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 2s;
+}
+
+#youtube,
+#youtube-card {
+  display: none;
+}
+
+@media (min-height: 425px) {
+  /** Youtube logo by https://codepen.io/alvaromontoro */
+  #youtube {
+    z-index: 2;
+    display: block;
+    width: 100px;
+    height: 70px;
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: red;
+    border-radius: 50% / 11%;
+    transform: scale(0.8);
+    transition: transform 0.5s;
+  }
+
+  #youtube:hover,
+  #youtube:focus {
+    transform: scale(0.9);
+  }
+
+  #youtube::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 7.5%;
+    left: -6%;
+    width: 112%;
+    height: 85%;
+    background: red;
+    border-radius: 9% / 50%;
+  }
+
+  #youtube::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 20px;
+    left: 40px;
+    width: 45px;
+    height: 30px;
+    border: 15px solid transparent;
+    box-sizing: border-box;
+    border-left: 30px solid white;
+  }
+
+  #youtube span {
+    font-size: 0;
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
+  #youtube:hover + #youtube-card {
+    display: block;
+    position: absolute;
+    bottom: 12px;
+    left: 10px;
+    padding: 25px 25px 25px 130px;
+    width: 300px;
+    background-color: white;
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap');
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease;
+  z-index: 2000;
+  padding: 1rem;
+  box-sizing: border-box;
+  font-family: 'Outfit', sans-serif;
+}
+
+.modal-overlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal {
+  background: rgba(18, 21, 36, 0.85); 
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 500px;
+  padding: 2.5rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 255, 255, 0.05);
+  text-align: center;
+  color: #fff;
+  transform: scale(0.8) translateY(50px);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 24px;
+  padding: 3px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), #00E5FF, rgba(255,255,255,0));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: modalBorderPulse 2s infinite alternate ease-in-out;
+}
+
+@keyframes modalBorderPulse {
+  from { opacity: 0.2; }
+  to { opacity: 0.8; }
+}
+
+.modal-overlay.is-visible .modal {
+  transform: scale(1) translateY(0);
+}
+
+.modal h2 {
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+  font-weight: 900;
+  color: #00E5FF;
+  text-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+}
+
+.modal p {
+  margin: 0 0 2rem 0;
+  font-size: 1.1rem;
+  color: #cdd1e0;
+  line-height: 1.6;
+}
+
+.modal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 40px;
+  background: #00E5FF;
+  color: #0b0c10;
+  text-decoration: none;
+  border-radius: 30px;
+  font-weight: 800;
+  font-size: 1.3rem;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3), 0 0 20px rgba(0,229,255,0.2);
+}
+
+.modal-btn:hover {
+  background: #66ffff;
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 15px 25px rgba(0,0,0,0.4), 0 0 40px #00E5FF;
+}
+
+.modal-btn:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.4), 0 0 15px #00E5FF;
+}
