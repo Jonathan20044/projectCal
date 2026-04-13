@@ -24,6 +24,14 @@ body {
   font-weight: 900;
 }
 
+#lives {
+  position: absolute;
+  top: 80px;
+  right: 30px;
+  font-size: 1.8em;
+  letter-spacing: 0.15em;
+}
+
 #introduction {
   width: 200px;
   height: 150px;

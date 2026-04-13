@@ -141,12 +141,20 @@
     }
 
     if (source === "stickHero") {
-      if (correct) {
-        localStorage.setItem("stickHeroResumeOk", "true");
-      } else {
-        localStorage.removeItem("stickHeroResume");
-        localStorage.setItem("stickHeroRestart", "true");
+      var lives = parseInt(localStorage.getItem("stickHeroLives"), 10);
+      if (!Number.isFinite(lives) || lives < 0) lives = 3;
+
+      if (!correct) {
+        lives = Math.max(0, lives - 1);
+        localStorage.setItem("stickHeroLives", lives);
       }
+
+      if (lives === 0) {
+        localStorage.setItem("stickHeroRestart", "true");
+        localStorage.removeItem("stickHeroResumeOk");
+      } else {        localStorage.setItem("stickHeroPaused", "true");        localStorage.setItem("stickHeroResumeOk", "true");
+      }
+
       window.location.href = "stickHero.html";
       return;
     }

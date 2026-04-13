@@ -24,6 +24,8 @@ let trees = [];
 
 let score = 0;
 
+let lives = parseInt(localStorage.getItem("stickHeroLives")) || 3;
+
 // Configuration
 const canvasWidth = 375;
 const canvasHeight = 375;
@@ -63,15 +65,21 @@ const restartButton = document.getElementById("restart");
 const scoreElement = document.getElementById("score");
 
 // Initialize layout
-resetGame();
+initializeGame();
 
 // Resets game variables and layouts but does not start the game (game starts on keypress)
-function resetGame() {
+function resetGame(resetLives = false) {
   // Reset game progress
   phase = "waiting";
   lastTimestamp = undefined;
   sceneOffset = 0;
   score = 0;
+
+  if (!Number.isFinite(lives) || lives <= 0 || resetLives) {
+    lives = 3;
+  }
+  localStorage.setItem("stickHeroLives", lives);
+  updateLivesDisplay();
 
   introductionElement.style.opacity = 1;
   perfectElement.style.opacity = 0;
@@ -154,19 +162,18 @@ function generatePlatform() {
   platforms.push({ x, w });
 }
 
-resetGame();
-
 // If space was pressed restart the game
 window.addEventListener("keydown", function (event) {
   if (event.key == " ") {
     event.preventDefault();
-    resetGame();
+    resetGame(true);
     return;
   }
 });
 
 window.addEventListener("mousedown", function (event) {
   if (phase == "waiting") {
+    saveCheckpointState();
     lastTimestamp = undefined;
     introductionElement.style.opacity = 0;
     phase = "stretching";
@@ -176,6 +183,7 @@ window.addEventListener("mousedown", function (event) {
 
 window.addEventListener("touchstart", function (event) {
   if (phase == "waiting") {
+    saveCheckpointState();
     lastTimestamp = undefined;
     introductionElement.style.opacity = 0;
     phase = "stretching";
@@ -260,6 +268,7 @@ function animate(timestamp) {
         const maxHeroX = sticks.last().x + sticks.last().length + heroWidth;
         if (heroX > maxHeroX) {
           heroX = maxHeroX;
+          localStorage.setItem("stickHeroPaused", "true");
           phase = "falling";
         }
       }
@@ -350,7 +359,7 @@ function draw() {
 
 restartButton.addEventListener("click", function (event) {
   event.preventDefault();
-  resetGame();
+  resetGame(true);
   restartButton.style.display = "none";
 });
 
@@ -536,8 +545,108 @@ function getTreeY(x, baseHeight, amplitude) {
   return Math.sinus(x) * amplitude + sineBaseY;
 }
 
-if (localStorage.getItem("stickHeroRestart") === "true") {
-  localStorage.removeItem("stickHeroRestart");
-  resetGame();
+function saveCheckpointState() {
+  const state = {
+    platforms,
+    trees,
+    sceneOffset,
+    score,
+    lives,
+    heroX,
+    heroY,
+    sticks
+  };
+  localStorage.setItem("stickHeroCheckpointState", JSON.stringify(state));
 }
+
+function restoreCheckpointState(state) {
+  platforms = Array.isArray(state.platforms) ? state.platforms : [{ x: 50, w: 50 }];
+  trees = Array.isArray(state.trees) ? state.trees : [];
+  sceneOffset = Number.isFinite(state.sceneOffset) ? state.sceneOffset : 0;
+  score = Number.isFinite(state.score) ? state.score : 0;
+  lives = parseInt(localStorage.getItem("stickHeroLives"), 10);
+  if (!Number.isFinite(lives) || lives <= 0) {
+    lives = 3;
+  }
+
+  heroX = Number.isFinite(state.heroX)
+    ? state.heroX
+    : platforms[0].x + platforms[0].w - heroDistanceFromEdge;
+  heroY = Number.isFinite(state.heroY) ? state.heroY : 0;
+  sticks = Array.isArray(state.sticks)
+    ? state.sticks
+    : [{ x: platforms[0].x + platforms[0].w, length: 0, rotation: 0 }];
+
+  // Reset last stick length/rotation, but keep its anchor x from state
+  if (sticks.length > 0) {
+    const lastStick = sticks[sticks.length - 1];
+    lastStick.length = 0;
+    lastStick.rotation = 0;
+  }
+
+  // Ensure the hero remains visible on restore
+  const leftMargin = 80;
+  const rightMargin = canvasWidth - 80;
+  if (!Number.isFinite(sceneOffset)) sceneOffset = 0;
+  if (heroX - sceneOffset < leftMargin) {
+    sceneOffset = Math.max(0, heroX - leftMargin);
+  }
+  if (heroX - sceneOffset > rightMargin) {
+    sceneOffset = Math.max(0, heroX - rightMargin);
+  }
+
+  phase = "waiting";
+  lastTimestamp = undefined;
+
+  introductionElement.style.opacity = 1;
+  perfectElement.style.opacity = 0;
+  restartButton.style.display = "none";
+  scoreElement.innerText = score;
+  updateLivesDisplay();
+  draw();
+}
+
+function initializeGame() {
+  const restart = localStorage.getItem("stickHeroRestart") === "true";
+  const paused = localStorage.getItem("stickHeroPaused") === "true";
+  const savedStateRaw = localStorage.getItem("stickHeroCheckpointState");
+
+  if (restart) {
+    localStorage.removeItem("stickHeroRestart");
+    localStorage.removeItem("stickHeroPaused");
+    localStorage.removeItem("stickHeroCheckpointState");
+    resetGame(true);
+    return;
+  }
+
+  if (paused && savedStateRaw) {
+    let savedState;
+    try {
+      savedState = JSON.parse(savedStateRaw);
+    } catch (error) {
+      savedState = null;
+    }
+
+    if (savedState) {
+      localStorage.removeItem("stickHeroPaused");
+      localStorage.removeItem("stickHeroCheckpointState");
+      restoreCheckpointState(savedState);
+      return;
+    }
+
+    localStorage.removeItem("stickHeroPaused");
+    localStorage.removeItem("stickHeroCheckpointState");
+  }
+
+  resetGame(true);
+}
+
+function updateLivesDisplay() {
+  const livesElement = document.getElementById("lives");
+  if (livesElement) {
+    livesElement.innerText = "❤️".repeat(lives);
+  }
+}
+
+updateLivesDisplay();
 
