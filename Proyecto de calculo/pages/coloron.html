@@ -52,7 +52,7 @@ design by https://www.behance.net/vahanhovh
                         <span>o</span>
                         <span>n</span>
                     </p>
-                    <a class="play-button" href="#" onclick="game.start()">Play</a>
+                    <a class="play-button" href="javascript:void(0)" onclick="game.start()">Play</a>
                     <h4 class="hint">hint: <span>red</span> color always comes first</h4>
                 </div>
 
@@ -130,14 +130,21 @@ design by https://www.behance.net/vahanhovh
             <div class="scene">
                 <div class="learn-to-play">Click on the bars to change the color!</div>
                 <div class="score" id="score"></div>
+                <div class="lives" id="lives">❤️❤️❤️</div>
+                <div id="timer" style="position: fixed; top: 20px; right: 20px; font-size: 24px; color: white; font-weight: bold; z-index: 9999;">5</div>
                 <div class="ball-holder"></div>
-                <div class="sticks" id="sticks"></div>
+                <div id="sticks"></div>
+                <div class="noise"></div>
+
             </div>
-
-            <div class="noise"></div>
-
         </div>
 <!-- partial -->
+            <div class="resume-overlay" id="resume-overlay">
+                <div class="resume-box">
+                    <div class="resume-text">Continuando en</div>
+                    <div class="resume-countdown" id="resume-countdown">3</div>
+                </div>
+            </div>
   <script src='https://code.jquery.com/jquery-3.1.1.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.0/TweenMax.min.js'></script><script  src="../js/coloron.js"></script>
 

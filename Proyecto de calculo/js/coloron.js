@@ -12,6 +12,15 @@ class Game {
     this.colorsRGBA = ["rgba(255, 69, 113, 1)", "rgba(255, 69, 113, 1)", "rgba(255, 69, 113, 1)"];
     this.color = this.colors[0]; // the intial color of the ball
     this.prevColor = null; // used as a holder to prevent ball colors from repeating
+
+    this.lives = 3;
+    this.colorTimer = 5;
+    this.currentTime = this.colorTimer;
+    this.timerInterval = null;
+    this.resumeTimer = null;
+    this.skipNextCheck = false;
+    this.resumeLock = false;
+    this.skipResumeContact = false;
   }
 
   /**
@@ -50,6 +59,176 @@ class Game {
     let top = $(window).height() / 2 - 150;
     let left = $(window).width() / 2 - 300;
     window.open("https://twitter.com/intent/tweet?url=https://codepen.io/gregh/full/yVLOyO&amp;text=I scored " + this.score + " points on Coloron! Can you beat my score?&amp;via=greghvns&amp;hashtags=coloron", "TweetWindow", "width=600px,height=300px,top=" + top + ",left=" + left);
+  }
+
+  startColorTimer() {
+    clearInterval(this.timerInterval);
+
+    this.currentTime = this.colorTimer;
+    $('#timer').text(this.currentTime);
+
+    this.timerInterval = setInterval(() => {
+      this.currentTime--;
+      $('#timer').text(this.currentTime);
+
+      if (this.currentTime <= 0) {
+        this.currentTime = this.colorTimer;
+        $('#timer').text(this.currentTime);
+      }
+    }, 1000);
+  }
+
+  startResumeCountdown(seconds = 3) {
+    clearInterval(this.timerInterval);
+    clearInterval(this.resumeTimer);
+
+    const overlay = $('#resume-overlay');
+    const countdown = $('#resume-countdown');
+    let remaining = seconds;
+
+    countdown.text(remaining);
+    overlay.css({ display: 'flex', visibility: 'visible' });
+
+    this.resumeLock = true;
+    this.resumeTimer = setInterval(() => {
+      remaining -= 1;
+      countdown.text(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(this.resumeTimer);
+        overlay.css({ display: 'none', visibility: 'hidden' });
+        this.resumeLock = false;
+        this.skipResumeContact = true;
+        setTimeout(() => { this.skipResumeContact = false; }, 2000);
+        this.startColorTimer();
+        this.balltween.play();
+        this.timeline.play();
+      }
+    }, 1000);
+  }
+
+  changeAllSticksColor() {
+    $('#sticks .stick').each(function () {
+      const randomColor = new Color().getRandomColor();
+      const colorName = new Color().colorcodeToName(randomColor);
+
+      $(this)
+        .css('background-color', randomColor)
+        .removeClass('red yellow purple')
+        .addClass(colorName);
+    });
+  }
+
+  updateLivesDisplay() {
+    $('#lives').text('❤️'.repeat(this.lives));
+  }
+
+  pauseForQuestion(stickIndex) {
+    if (this.isPausedForQuestion) return;
+    this.isPausedForQuestion = true;
+    this.isRunning = 0;
+    const sticksState = [];
+    $('#sticks .stick').each(function () {
+      sticksState.push({ className: this.className, innerHTML: $(this).html() });
+    });
+
+    const checkpointState = {
+      score: this.score,
+      time: this.time,
+      color: this.color,
+      prevColor: this.prevColor,
+      lives: this.lives,
+      timelineProgress: this.timeline ? this.timeline.progress() : 0,
+      ballProgress: this.balltween ? this.balltween.progress() : 0.01,
+      sticksState: sticksState,
+      currentStickIndex: Number.isFinite(stickIndex) ? stickIndex : null
+    };
+
+    TweenMax.killAll();
+    clearInterval(this.timerInterval);
+    localStorage.setItem("coloronPaused", "true");
+    localStorage.setItem("coloronLives", this.lives);
+    localStorage.setItem("coloronCheckpointState", JSON.stringify(checkpointState));
+    localStorage.setItem("coloronSkipNextCheck", "true");
+    window.location.href = "questions.html?source=coloron";
+  }
+
+  resumeFromCheckpoint(state) {
+    this.isPausedForQuestion = false;
+    TweenMax.killAll();
+    $('.start-game, .stop-game').css('display', 'none');
+    $('.nominee').hide();
+
+    this.score = Number.isFinite(state.score) ? state.score : 0;
+    this.time = Number.isFinite(state.time) ? state.time : 1.6;
+    this.color = state.color || this.colors[0];
+    this.prevColor = state.prevColor || this.color;
+    this.lives = Number.isFinite(state.lives) ? state.lives : 3;
+
+    const storedLives = parseInt(localStorage.getItem("coloronLives"), 10);
+    if (Number.isFinite(storedLives) && storedLives >= 0) {
+      this.lives = storedLives;
+    }
+
+    this.isRunning = 1;
+
+    $('#sticks, .scene .ball-holder').html('');
+    $('#score').text(this.score);
+    this.updateLivesDisplay();
+
+    if (Array.isArray(state.sticksState) && state.sticksState.length) {
+      state.sticksState.forEach((stickState) => {
+        $('#sticks').append(`<div class="${stickState.className}">${stickState.innerHTML}</div>`);
+      });
+    } else {
+      this.generateSticks();
+    }
+
+    this.generateBall();
+
+    this.skipNextCheck = localStorage.getItem("coloronSkipNextCheck") === "true";
+
+    if (this.skipNextCheck && Number.isFinite(state.currentStickIndex)) {
+      const failedStick = $('#sticks .stick').eq(state.currentStickIndex);
+      if (failedStick.length) {
+        const currentBallColorName = new Color().colorcodeToName(this.color);
+        failedStick
+          .css('background-color', this.color)
+          .removeClass('red yellow purple inactive')
+          .addClass(currentBallColorName);
+      }
+    }
+
+    if (!/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(window.navigator.userAgent)) {
+      Animation.sceneAnimation();
+    }
+
+    TweenMax.set('#ball', { scale: 1, backgroundColor: this.color });
+    $('#ball').removeClass('red').removeClass('yellow').removeClass('purple').addClass(new Color().colorcodeToName(this.color));
+
+    this.moveScene();
+
+    const speed = this.speedUp();
+    this.timeline.timeScale(speed);
+    this.balltween.timeScale(speed);
+
+    if (Number.isFinite(state.timelineProgress)) {
+      this.timeline.progress(state.timelineProgress);
+    }
+    if (Number.isFinite(state.ballProgress)) {
+      this.balltween.progress(state.ballProgress);
+    }
+
+    if (this.skipNextCheck) {
+      this.balltween.pause();
+      this.timeline.pause();
+      this.startResumeCountdown(3);
+      localStorage.removeItem("coloronSkipNextCheck");
+    } else {
+      this.startColorTimer();
+      this.balltween.play();
+      this.timeline.play();
+    }
   }
 
   /**
@@ -122,12 +301,9 @@ class Game {
 
   start() {
 
-    this.stop(); // stop the game
-
     $('.start-game, .stop-game').css('display', 'none'); // hide all the popups
     $('.nominee').hide();
 
-    new Game();
     this.score = 0; // reset
 
     this.isRunning = 1;
@@ -138,6 +314,10 @@ class Game {
     $('#score').text(this.score);
     this.generateSticks();
     this.generateBall();
+    this.lives = 3;
+    localStorage.setItem("coloronLives", this.lives);
+    this.updateLivesDisplay();
+    this.startColorTimer();
 
     // disables scene animations for Phones
     if (!/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(window.navigator.userAgent)) {
@@ -151,15 +331,18 @@ class Game {
     this.balltween.timeScale(1);
   }
 
-  stop() {
-
+  stop(showResult = true) {
     this.isRunning = 0;
+
+    clearInterval(this.timerInterval);
 
     $('.start-game, .stop-game').css('display', 'none');
     $('#sticks, .scene .ball-holder, #score').html('');
     TweenMax.killAll();
 
-    this.showResult();
+    if (showResult) {
+      this.showResult();
+    }
   }
 
   scaleScreen() {
@@ -314,12 +497,21 @@ class Game {
 
   checkColor() {
 
+  if (!this.isRunning || this.resumeLock || this.skipResumeContact || this.isPausedForQuestion) {
+  return;
+}
+
     let ballPos = $('#ball').offset().left + $('#ball').width() / 2;
     let stickWidth = $('.stick').width();
     let score = this.score;
 
-    $('#sticks .stick').each(function () {
+    $('#sticks .stick').each(function (index) {
       if ($(this).offset().left < ballPos && $(this).offset().left > ballPos - stickWidth) {
+        if ($(this).hasClass('inactive')) {
+          // inactive stick means the player did not color it yet, so treat as mismatch
+          game.pauseForQuestion(index);
+          return false;
+        }
 
         if (Color.getColorFromClass($(this)) == Color.getColorFromClass('#ball')) {
           // if matches increase the score
@@ -327,12 +519,11 @@ class Game {
           $('#score').text(score);
           TweenMax.fromTo('#score', 0.5, { scale: 1.5 }, { scale: 1, ease: Elastic.easeOut.config(1.5, 0.5) });
         } else {
-
-          // you loose
-          game.stop();
-
+          // pause and ask a question instead of losing immediately
+          game.pauseForQuestion(index);
         }
 
+        return false; // stop checking after the stick under the ball is handled
       }
     });
 
@@ -345,6 +536,7 @@ class Stick {
 
   constructor() {
     this.stick = this.addStick();
+    this.isPausedForQuestion = false;
   }
 
   addStick() {
@@ -548,11 +740,38 @@ var userAgent = window.navigator.userAgent;
 Animation.generateSmallGlows(20);
 
 $(document).ready(function () {
-  //game.showResult();
   game.scaleScreen();
-  game.intro();
-  //game.start();
-  //game.bounce();
+
+localStorage.removeItem("coloronPaused");
+localStorage.removeItem("coloronCheckpointState");
+localStorage.removeItem("coloronSkipNextCheck");
+
+  const paused = localStorage.getItem("coloronPaused") === "true";
+  const savedStateRaw = localStorage.getItem("coloronCheckpointState");
+  const restart = localStorage.getItem("coloronRestart") === "true";
+
+  if (restart) {
+    localStorage.removeItem("coloronRestart");
+    localStorage.removeItem("coloronPaused");
+    localStorage.removeItem("coloronCheckpointState");
+    game.start();
+  } else if (paused && savedStateRaw) {
+    let savedState = null;
+    try {
+      savedState = JSON.parse(savedStateRaw);
+    } catch (error) {
+      savedState = null;
+    }
+    if (savedState) {
+      localStorage.removeItem("coloronPaused");
+      localStorage.removeItem("coloronCheckpointState");
+      game.resumeFromCheckpoint(savedState);
+    } else {
+      game.intro();
+    }
+  } else {
+    game.intro();
+  }
 
   if ($(window).height() < 480) {
     $('.play-full-page').css('display', 'block');
