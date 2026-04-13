@@ -235,3 +235,52 @@ body {
   0%, 100% { opacity: 0.6; transform: scale(0.95); }
   50% { opacity: 1; transform: scale(1.05); }
 }
+
+#btn-menu {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 10px 22px;
+  background: rgba(0,229,255,0.08);
+  color: #00E5FF;
+  border: 1px solid rgba(0,229,255,0.4);
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  z-index: 3000;
+  backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 0 10px rgba(0,229,255,0.3),
+    0 0 25px rgba(0,150,255,0.25);
+
+  transition: all 0.3s ease;
+}
+
+#btn-menu::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #00E5FF, #0077FF);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+#btn-menu:hover {
+  color: #000;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow:
+    0 0 20px #00E5FF,
+    0 0 40px rgba(0,150,255,0.6);
+}
+
+#btn-menu:hover::before {
+  opacity: 1;
+}
+
+#btn-menu:active {
+  transform: scale(0.95);
+}
