@@ -976,13 +976,20 @@ function answerWrong() {
 
   audio.pause();
   map.draw(ctx);
+  if (user.getLives() <= 0) {
+    dialog("Game Over");
+
+    setTimeout(function () {
+      startNewGame(); 
+    }, 1500);
+
+    return; // 
+  }
+
   dialog("Responde la pregunta");
   setState(PAUSE);
 
-  if (user.getLives() > 0) {
-    saveResumeState(); 
-  }
-
+  saveResumeState();
   showQuestionModal();
 }
 
