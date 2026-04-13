@@ -218,6 +218,46 @@ body {
   font-size: 1.05rem;
 }
 
+.latex-container {
+  background: rgba(255, 102, 204, 0.1);
+  border: 2px solid #FF66CC;
+  border-radius: 12px;
+  padding: 30px 20px;
+  margin: 20px 0;
+  text-align: center;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+}
+
+.option-text {
+  display: inline-block;
+}
+
+.katex-display {
+  margin: 10px 0;
+}
+
+.katex {
+  font-size: 1.2em;
+}
+
+#procedure-text .katex-display {
+  margin: 15px 0;
+  overflow-x: auto;
+}
+
+#procedure-text .katex {
+  font-size: 1.1em;
+}
+
+#procedure-box {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
 @media (max-width: 480px) {
   .options-grid {
     grid-template-columns: 1fr;

@@ -332,29 +332,46 @@ function updateOneBall(b) {
 
 // ── Main game update ───────────────────────────────────
 function updateGame() {
-  // Delayed launch: count up and release ball 2 when ready
+  // Delayed launch: count up and release balls when ready
   if (!ball2Launched && !gameOverPending) {
     ball2LaunchTimer++;
     if (ball2LaunchTimer >= ball2LaunchFrames) {
       ball2Launched = true;
-      // Launch from current paddle center
-      const b2 = balls[1];
-      b2.x = paddle.x;
-      b2.y = paddle.y - b2.r - 2;
-      b2.pending = false;
-      spawnParticles(b2.x, b2.y, b2.theme.outer, 12);
+      // Launch any pending ball from current paddle center
+      balls.forEach((b, i) => {
+        if (b.pending) {
+          b.x = paddle.x;
+          b.y = paddle.y - b.r - 2;
+          // Reiniciamos su velocidad hacia arriba para asegurarnos de que salga bien
+          const angle = -Math.PI / 2 + (i === 1 ? -0.3 : 0.3);
+          b.vx = Math.cos(angle) * baseSpeed;
+          b.vy = Math.sin(angle) * baseSpeed;
+          b.pending = false;
+          spawnParticles(b.x, b.y, b.theme.outer, 12);
+        }
+      });
     }
   }
 
   balls.forEach(b => { if (!b.dead && !b.pending) updateOneBall(b); });
 
-  // Game over when ANY ball falls
-  const anyDead = balls.some(b => b.dead);
-  if (anyDead && !gameOverPending) {
+  // Game over when ALL active balls fall
+  const allDead = balls.every(b => b.dead || b.pending);
+  if (allDead && !gameOverPending) {
     gameOverPending = true;
     endGame();
     return;
   }
+
+  // Reload dead balls back to pending state to respawn them
+  balls.forEach(b => {
+    if (b.dead) {
+      b.dead = false;
+      b.pending = true;
+      ball2Launched = false;
+      ball2LaunchTimer = 0; // Reinicia el tiempo para que vuelva a salir
+    }
+  });
 
   // Level cleared
   if (bricks.every(b => !b.alive) && !gameOverPending) {
