@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <title>CodePen - Flappy Dino</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="../css/flappyDino.css">
-
 </head>
+
 <body>
 <!-- partial:index.partial.html -->
+
+<button id="btn-menu" onclick="window.location.href='../index.html';">
+  Regresar al menú
+</button>
+
 <div class="ctn">
   <canvas id="c" width="360px" height="640px"></canvas>
   <div id="scoreboard">0</div>
@@ -30,8 +35,9 @@
     </div>
   </div>
 </div>
+
 <!-- partial -->
-  <script  src="../js/flappyDino.js"></script>
+<script src="../js/flappyDino.js"></script>
 
 </body>
 </html>

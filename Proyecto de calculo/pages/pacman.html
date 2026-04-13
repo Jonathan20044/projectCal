@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <title>CodePen - Pacman HTML5</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Permanent+Marker'><link rel="stylesheet" href="../css/pacman.css">
-
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Permanent+Marker'>
+  <link rel="stylesheet" href="../css/pacman.css">
 </head>
+
 <body>
 <!-- partial:index.partial.html -->
 <div id="shim">shim for font face</div>
 
-      <!-- Header Title Removed -->
-
+<button id="btn-menu" onclick="window.location.href='../index.html';">
+  Regresar al menú
+</button>
 
 <div id="pacman"></div>
-
-
 
 <div id="question-modal" class="modal-overlay" aria-hidden="true">
   <div class="modal">
@@ -24,9 +24,11 @@
     <a class="modal-btn" href="questions.html?source=pacman">Responder</a>
   </div>
 </div>
+
 <!-- partial -->
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script><script src="../js/pacman.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src="../js/pacman.js"></script>
 
 </body>
 </html>
