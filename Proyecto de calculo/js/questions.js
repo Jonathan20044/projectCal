@@ -1,7 +1,7 @@
 (function () {
   var form = document.getElementById("question-form");
   var dynamicContainer = document.getElementById("dynamic-question-container");
-  
+
   var result = document.getElementById("result");
   var resultIcon = document.getElementById("result-icon");
   var resultTitle = document.getElementById("result-title");
@@ -9,7 +9,7 @@
   var procedureBox = document.getElementById("procedure-box");
   var procedureText = document.getElementById("procedure-text");
   var continueBtn = document.getElementById("continue-btn");
-  
+
   var params = new URLSearchParams(window.location.search);
   var source = params.get("source");
 
@@ -138,9 +138,9 @@
         if (el && (opt.includes('\\') || opt.includes('^'))) {
           try {
             el.innerHTML = '';
-            katex.render(opt, el, { 
+            katex.render(opt, el, {
               throwOnError: false,
-              displayMode: false 
+              displayMode: false
             });
           } catch (e) {
             console.log('LaTeX render error for option', idx);
@@ -159,7 +159,7 @@
 
     var val = selected.value;
     var isCorrect = val === currentQuestion.correct;
-    
+
     var forceRestart = localStorage.getItem("pacmanForceRestart") === "true";
     if (forceRestart) {
       isCorrect = false;
@@ -175,24 +175,23 @@
       resultTitle.textContent = "¡Respuesta Correcta!";
       resultTitle.style.color = "#00FF66";
       resultMessage.textContent = "¡Magistral! Tu conocimiento está intacto, tienes permiso para continuar la partida ahora mismo.";
-      
+
       procedureBox.hidden = true;
       continueBtn.innerHTML = "Continuar Partida <i class='bx bx-space-bar'></i>";
-      
+
     } else {
       resultIcon.innerHTML = "<i class='bx bx-x-circle'></i>";
       resultIcon.className = "result-icon error";
       resultTitle.textContent = "Respuesta Incorrecta";
       resultTitle.style.color = "#FF0055";
-      resultMessage.textContent = "Has fallado. Tu error tiene consecuencias, por lo que tendrás que reiniciar tu juego desde cero.";
-      
+resultMessage.textContent = "Has fallado. Pierdes una vida, pero puedes continuar la partida.";
       procedureBox.hidden = false;
       procedureText.innerHTML = '';
-      
+
       // Crear contenedor para renderizar la opción seleccionada
       let selectedContainer = document.createElement('span');
       let correctContainer = document.createElement('span');
-      
+
       // Renderizar opción seleccionada si tiene LaTeX
       if (val.includes('\\') || val.includes('^')) {
         try {
@@ -203,7 +202,7 @@
       } else {
         selectedContainer.textContent = val;
       }
-      
+
       // Renderizar opción correcta si tiene LaTeX
       if (currentQuestion.correct.includes('\\') || currentQuestion.correct.includes('^')) {
         try {
@@ -214,60 +213,60 @@
       } else {
         correctContainer.textContent = currentQuestion.correct;
       }
-      
+
       // Crear texto de intro
       let introDiv = document.createElement('div');
       introDiv.appendChild(document.createTextNode('Seleccionaste '));
-      
+
       let selectedBold = document.createElement('b');
       selectedBold.appendChild(selectedContainer);
       introDiv.appendChild(selectedBold);
-      
+
       introDiv.appendChild(document.createTextNode(', pero la respuesta correcta era '));
-      
+
       let correctBold = document.createElement('b');
       correctBold.appendChild(correctContainer);
       introDiv.appendChild(correctBold);
-      
+
       introDiv.appendChild(document.createTextNode('.'));
       procedureText.appendChild(introDiv);
-      
+
       // Insertar salto de línea
       procedureText.appendChild(document.createElement('br'));
       procedureText.appendChild(document.createElement('br'));
-      
+
       // Insertar el procedimiento
       let procDiv = document.createElement('div');
       procDiv.innerHTML = currentQuestion.procedure;
       procedureText.appendChild(procDiv);
-      
+
       // Renderizar LaTeX en el procedimiento con delay
       setTimeout(() => {
         if (window.katex) {
           try {
             let html = procDiv.innerHTML;
-            
+
             // Reemplazar entidades HTML
             html = html.replace(/&amp;/g, '&')
-                      .replace(/&lt;/g, '<')
-                      .replace(/&gt;/g, '>')
-                      .replace(/&quot;/g, '"')
-                      .replace(/&#039;/g, "'");
-            
+              .replace(/&lt;/g, '<')
+              .replace(/&gt;/g, '>')
+              .replace(/&quot;/g, '"')
+              .replace(/&#039;/g, "'");
+
             const regex = /\$\$([\s\S]*?)\$\$/g;
             let lastIndex = 0;
             let newHtml = '';
             let match;
-            
+
             while ((match = regex.exec(html)) !== null) {
               newHtml += html.substring(lastIndex, match.index);
-              
+
               let span = document.createElement('span');
               try {
-                katex.render(match[1], span, { 
-                  displayMode: true, 
+                katex.render(match[1], span, {
+                  displayMode: true,
                   throwOnError: false,
-                  strict: false 
+                  strict: false
                 });
                 newHtml += span.innerHTML;
               } catch (e) {
@@ -277,19 +276,19 @@
             }
             newHtml += html.substring(lastIndex);
             procDiv.innerHTML = newHtml;
-            
+
           } catch (e) {
             console.log('Error rendering procedure LaTeX:', e);
           }
         }
       }, 150);
-      
+
       continueBtn.innerHTML = "Volver a Jugar <i class='bx bx-refresh'></i>";
       continueBtn.style.background = "#FF0055";
       continueBtn.style.color = "#fff";
       continueBtn.style.boxShadow = "0 10px 20px rgba(255,0,85,0.3)";
     }
-    
+
     localStorage.setItem('lastAnswerCorrect', isCorrect.toString());
   });
 
@@ -330,11 +329,33 @@
 
       if (lives === 0) {
         localStorage.setItem("stickHeroRestart", "true");
-        localStorage.removeItem("stickHeroResumeOk");
-      } else {        localStorage.setItem("stickHeroPaused", "true");        localStorage.setItem("stickHeroResumeOk", "true");
+        localStorage.removeItem("stickHeroPaused");
+      } else {
+        localStorage.setItem("stickHeroPaused", "true");
       }
 
       window.location.href = "stickHero.html";
+      return;
+    }
+
+    if (source === "coloron") {
+      var lives = parseInt(localStorage.getItem("coloronLives"), 10);
+      if (!Number.isFinite(lives) || lives <= 0) {
+        lives = 3;
+      }
+      if (!correct) {
+        lives = lives - 1;
+        localStorage.setItem("coloronLives", lives);
+      }
+      if (lives <= 0) {
+        localStorage.setItem("coloronRestart", "true");
+        localStorage.removeItem("coloronPaused");
+      } else {
+        localStorage.setItem("coloronPaused", "true");
+        localStorage.removeItem("coloronRestart"); // 👈 CLAVE
+      }
+
+      window.location.href = "coloron.html";
       return;
     }
 
