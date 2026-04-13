@@ -872,6 +872,45 @@ var PACMAN = (function () {
     questionActive = true;
   }
 
+  function answerCorrect() {
+  var resumeRaw = localStorage.getItem("pacmanResume");
+
+  if (resumeRaw) {
+    var resumeData = JSON.parse(resumeRaw);
+
+    level = resumeData.level || 1;
+
+    user.reset();
+    user.setLives(resumeData.lives);
+    user.setScore(resumeData.score);
+
+    map.reset();
+    map.draw(ctx);
+
+    startLevel();
+  }
+
+  localStorage.removeItem("pacmanResume");
+
+  var modal = document.getElementById("question-modal");
+  modal.classList.remove("is-visible");
+  modal.setAttribute("aria-hidden", "true");
+
+  questionActive = false;
+}
+
+function answerWrong() {
+  localStorage.removeItem("pacmanResume");
+
+  var modal = document.getElementById("question-modal");
+  modal.classList.remove("is-visible");
+  modal.setAttribute("aria-hidden", "true");
+
+  questionActive = false;
+
+  startNewGame(); 
+}
+
   function saveResumeState() {
     var payload = {
       lives: user.getLives(),
@@ -931,27 +970,21 @@ var PACMAN = (function () {
     return true;
   }
 
-  function loseLife() {
-    setState(WAITING);
-    user.loseLife();
-    if (user.getLives() > 0) {
-      audio.pause();
-      map.draw(ctx);
-      dialog("Responde las preguntas");
-      setState(PAUSE);
-      saveResumeState();
-      localStorage.removeItem("pacmanForceRestart");
-      showQuestionModal();
-    } else {
-      audio.pause();
-      map.draw(ctx);
-      dialog("Fin del juego");
-      setState(PAUSE);
-      localStorage.removeItem("pacmanResume");
-      localStorage.setItem("pacmanForceRestart", "true");
-      showQuestionModal();
-    }
+ function loseLife() {
+  setState(WAITING);
+  user.loseLife(); 
+
+  audio.pause();
+  map.draw(ctx);
+  dialog("Responde la pregunta");
+  setState(PAUSE);
+
+  if (user.getLives() > 0) {
+    saveResumeState(); 
   }
+
+  showQuestionModal();
+}
 
   function setState(nState) {
     state = nState;
@@ -1235,9 +1268,11 @@ var PACMAN = (function () {
     }
   }
 
-  return {
-    init: init,
-  };
+ return {
+  init: init,
+  answerCorrect: answerCorrect,
+  answerWrong: answerWrong
+};
 })();
 
 /* Human readable keyCode index */
