@@ -254,6 +254,27 @@ function startGame() {
   meteorInterval = 60;
   meteorSpeed    = 3.5;
   levelDisplay   = 1;
+  scoreEl.textContent = survivalTime;
+  levelEl.textContent = levelDisplay;
+  running = true;
+  cancelAnimationFrame(frameId);
+  loop();
+}
+
+// ── Resume Game ───────────────────────────────────────────
+function resumeGame(state) {
+  resize();
+  initStars();
+  initShip();
+  meteors    = [];
+  shipTrail  = [];
+  frameCount = state.frameCount || 0;
+  survivalTime = state.survivalTime || 0;
+  meteorInterval = state.meteorInterval || 60;
+  meteorSpeed    = state.meteorSpeed || 3.5;
+  levelDisplay   = state.levelDisplay || 1;
+  scoreEl.textContent = survivalTime;
+  levelEl.textContent = levelDisplay;
   running = true;
   cancelAnimationFrame(frameId);
   loop();
@@ -367,8 +388,20 @@ function explodeLoop() {
     requestAnimationFrame(explodeLoop);
   } else {
     particles = [];
+    saveResumeState();
     showQuestionModal();
   }
+}
+
+function saveResumeState() {
+  const state = {
+    survivalTime: survivalTime,
+    levelDisplay: levelDisplay,
+    meteorSpeed: meteorSpeed,
+    meteorInterval: meteorInterval,
+    frameCount: frameCount
+  };
+  localStorage.setItem('meteorResume', JSON.stringify(state));
 }
 
 // ── Modals ────────────────────────────────────────────────
@@ -394,17 +427,35 @@ startOverlay.addEventListener('touchstart', (e) => {
   beginGame();
 }, { passive: false });
 
-// Resume after questions
-if (localStorage.getItem('meteorRestart') === 'true') {
-  localStorage.removeItem('meteorRestart');
+// Handle returning from questions
+const resumeOk = localStorage.getItem('meteorResumeOk') === 'true';
+const restart = localStorage.getItem('meteorRestart') === 'true';
+
+localStorage.removeItem('meteorResumeOk');
+localStorage.removeItem('meteorRestart');
+
+if (restart) {
+  localStorage.removeItem('meteorResume');
   beginGame();
+} else if (resumeOk) {
+  const resumeRaw = localStorage.getItem('meteorResume');
+  if (resumeRaw) {
+    const state = JSON.parse(resumeRaw);
+    localStorage.removeItem('meteorResume');
+    if (!gameStarted) {
+      gameStarted = true;
+      startOverlay.classList.remove('is-visible');
+      resumeGame(state);
+    }
+  }
 }
 
 // Initial draw while waiting
+initShip();
 (function idleDraw() {
   ctx.fillStyle = '#000010';
   ctx.fillRect(0, 0, W, H);
   drawStars();
-  drawShip(pos.x, pos.y); 
+  drawShip(ship.x, ship.y); 
   if (!running) requestAnimationFrame(idleDraw);
 })();

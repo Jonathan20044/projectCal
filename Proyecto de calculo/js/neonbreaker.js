@@ -396,9 +396,53 @@ window.addEventListener('touchmove', e => {
 window.addEventListener('touchend', () => { touchLastX = null; }, { passive: true });
 
 // ── Game Over ──────────────────────────────────────────
+function saveResumeState() {
+  const state = {
+    score: score,
+    levelNum: levelNum,
+    bricks: bricks,
+  };
+  localStorage.setItem('neonbreakerResume', JSON.stringify(state));
+}
+
+function resumeGame(state) {
+  resize();
+  const c = cfg();
+  levelNum            = state.levelNum || 1;
+  levelEl.textContent = levelNum;
+  score               = state.score || 0;
+  scoreEl.textContent = score;
+  particles           = [];
+  gameOverPending     = false;
+  ball2Launched       = false;
+  ball2LaunchTimer    = 0;
+
+  // Paddle
+  paddle = { x: W / 2, y: c.padY, w: c.padW, h: c.padH };
+
+  const mobileBoost = c.isMobile ? 1.4 : 1.0;
+  baseSpeed = Math.max(5, W * 0.007) * (1 + (levelNum - 1) * 0.18) * mobileBoost;
+
+  const angle1 = -Math.PI / 2 + 0.3;
+  balls = [
+    makeBall(W / 2, c.padY - c.ballR - 2, angle1, baseSpeed, c.ballR, 0),
+  ];
+  balls.push(Object.assign(
+    makeBall(W / 2, c.padY - c.ballR - 2, -Math.PI / 2 - 0.3, baseSpeed, c.ballR, 1),
+    { pending: true }
+  ));
+
+  bricks = state.bricks || [];
+
+  running = true;
+  cancelAnimationFrame(frameId);
+  loop();
+}
+
 function endGame() {
   running = false;
   cancelAnimationFrame(frameId);
+  saveResumeState();
   let f = 0;
   const flashId = setInterval(() => {
     ctx.fillStyle = `rgba(255, 20, 60, 0.2)`;
@@ -431,9 +475,26 @@ startOverlay.addEventListener('touchstart', (e) => {
   beginGame();
 }, { passive: false });
 
-if (localStorage.getItem('neonbreakerRestart') === 'true') {
-  localStorage.removeItem('neonbreakerRestart');
+const resumeOk = localStorage.getItem('neonbreakerResumeOk') === 'true';
+const restart = localStorage.getItem('neonbreakerRestart') === 'true';
+
+localStorage.removeItem('neonbreakerResumeOk');
+localStorage.removeItem('neonbreakerRestart');
+
+if (restart) {
+  localStorage.removeItem('neonbreakerResume');
   beginGame();
+} else if (resumeOk) {
+  const resumeRaw = localStorage.getItem('neonbreakerResume');
+  if (resumeRaw) {
+    const state = JSON.parse(resumeRaw);
+    localStorage.removeItem('neonbreakerResume');
+    if (!gameStarted) {
+      gameStarted = true;
+      startOverlay.classList.remove('is-visible');
+      resumeGame(state);
+    }
+  }
 }
 
 function idle() {

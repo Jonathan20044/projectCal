@@ -130,32 +130,56 @@
     }
 
     if (source === "flappy") {
-      // In flappy losing immediately triggers death, questions just delay restart
-      localStorage.setItem("flappyRestart", "true"); 
-      window.location.href = "flappyDino.html";
+      if (correct) {
+        localStorage.setItem("flappyResumeOk", "true");
+      } else {
+        localStorage.removeItem("flappyResume");
+        localStorage.setItem("flappyRestart", "true");
+      }
+      window.location.href = "flappy.html";
       return;
     }
 
     if (source === "stickHero") {
-      localStorage.setItem("stickHeroRestart", "true");
+      if (correct) {
+        localStorage.setItem("stickHeroResumeOk", "true");
+      } else {
+        localStorage.removeItem("stickHeroResume");
+        localStorage.setItem("stickHeroRestart", "true");
+      }
       window.location.href = "stickHero.html";
       return;
     }
 
     if (source === "snake") {
-      localStorage.setItem("snakeRestart", "true");
+      if (correct) {
+        localStorage.setItem("snakeResumeOk", "true");
+      } else {
+        localStorage.removeItem("snakeResume");
+        localStorage.setItem("snakeRestart", "true");
+      }
       window.location.href = "snake.html";
       return;
     }
 
     if (source === "meteor") {
-      localStorage.setItem("meteorRestart", "true");
+      if (correct) {
+        localStorage.setItem("meteorResumeOk", "true");
+      } else {
+        localStorage.removeItem("meteorResume");
+        localStorage.setItem("meteorRestart", "true");
+      }
       window.location.href = "meteor.html";
       return;
     }
 
     if (source === "neonbreaker") {
-      localStorage.setItem("neonbreakerRestart", "true");
+      if (correct) {
+        localStorage.setItem("neonbreakerResumeOk", "true");
+      } else {
+        localStorage.removeItem("neonbreakerResume");
+        localStorage.setItem("neonbreakerRestart", "true");
+      }
       window.location.href = "neonbreaker.html";
       return;
     }
