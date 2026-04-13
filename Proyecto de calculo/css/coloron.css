@@ -569,6 +569,7 @@ a:focus, a:active {
   left: 0;
   top: 0;
   z-index: 1010;
+  pointer-events: none;
   background: url(https://greghub.github.io/coloron/public/svg/noise.png);
 }
 
@@ -622,6 +623,7 @@ a:focus, a:active {
   border-radius: 14px;
   background-image: url(https://greghub.github.io/coloron/public/svg/noise.png);
   position: relative;
+  z-index: 1011;
   overflow: hidden;
   float: left;
   margin-right: 90px;
@@ -922,6 +924,14 @@ a:focus, a:active {
   font-weight: 900;
   letter-spacing: -0.1em;
 }
+.scene .lives {
+  position: fixed;
+  right: 54px;
+  top: 120px;
+  color: #FF0055;
+  font-size: 40px;
+  letter-spacing: 0.1em;
+}
 .scene .learn-to-play {
   z-index: 9999;
   display: inline-block;
@@ -933,6 +943,38 @@ a:focus, a:active {
   font-weight: 700;
   letter-spacing: -2px;
   opacity: 0;
+}
+
+.resume-overlay {
+  display: none;
+  position: fixed;
+  z-index: 10020;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
+}
+
+.resume-box {
+  text-align: center;
+  padding: 20px 30px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+}
+
+.resume-text {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.resume-countdown {
+  font-size: 72px;
+  color: #FF4571;
+  font-weight: 900;
 }
 
 .splash {
