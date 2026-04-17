@@ -286,8 +286,11 @@ function generateInitialBones() {
   bonePtr = 0;
   // Make sure we generate enough bones to cover the screen
   const requiredBones = Math.max(3, Math.ceil(canvas.width / boneGap) + 1);
-  for(let i=0; i<requiredBones; i++) {
-     bones.push({ x: boneStart + (i * boneGap), y: getRandomHeight(minBoneHeight, maxBoneHeight) });
+  for (let i = 0; i < requiredBones; i++) {
+    bones.push({
+      x: boneStart + i * boneGap,
+      y: getRandomHeight(minBoneHeight, maxBoneHeight),
+    });
   }
 }
 
@@ -385,32 +388,40 @@ function update() {
 }
 
 function resizeCtn() {
-  const ctn = document.querySelector('.ctn');
+  const ctn = document.querySelector(".ctn");
   if (ctn) {
-    const scale = window.innerHeight / 640;
-    const logicalWidth = window.innerWidth / scale;
-    
-    ctn.style.width = logicalWidth + 'px';
+    const viewportHeight = window.visualViewport
+      ? window.visualViewport.height
+      : window.innerHeight;
+    const viewportWidth = window.visualViewport
+      ? window.visualViewport.width
+      : window.innerWidth;
+    const scale = viewportHeight / 640;
+    const logicalWidth = Math.ceil(viewportWidth / scale);
+
+    ctn.style.top = "0px";
+    ctn.style.left = "0px";
+    ctn.style.width = logicalWidth + "px";
     ctn.style.transform = `scale(${scale})`;
-    
+
     canvas.width = logicalWidth;
     canvas.height = 640;
-    
+
     // Refresh bones if not started to fill new width
     if (!start && !gameOver) {
-       generateInitialBones();
+      generateInitialBones();
     }
   }
 }
-window.addEventListener('resize', resizeCtn);
+window.addEventListener("resize", resizeCtn);
 resizeCtn();
 
 function render() {
   document.getElementById("scoreboard").innerHTML = score;
 
   // Tile background
-  for(let x=0; x < canvas.width; x+=360) {
-     ctx.drawImage(bg, x, 0);
+  for (let x = 0; x < canvas.width; x += 360) {
+    ctx.drawImage(bg, x, 0);
   }
 
   for (var i = 0; i < bones.length; i++) {
@@ -433,15 +444,17 @@ function render() {
 
   // Tile foreground
   let fgDrawX = fgPos_X;
-  while(fgDrawX < canvas.width) {
+  while (fgDrawX < canvas.width) {
     ctx.drawImage(fg, fgDrawX, canvas.height - 150);
     fgDrawX += 360;
   }
 
   // Draw one extra just to complete the loop from left
   if (fgPos_X < 0) {
-      let rightmost = fgPos_X + (Math.ceil((-fgPos_X)/360) + Math.ceil(canvas.width/360)) * 360;
-      ctx.drawImage(fg, rightmost, canvas.height - 150);
+    let rightmost =
+      fgPos_X +
+      (Math.ceil(-fgPos_X / 360) + Math.ceil(canvas.width / 360)) * 360;
+    ctx.drawImage(fg, rightmost, canvas.height - 150);
   }
 
   window.requestAnimationFrame(update);

@@ -1174,11 +1174,17 @@ function answerWrong() {
     var i,
       len,
       ghost,
-      blockSize = Math.floor(window.innerHeight / 22),
+      viewport = window.visualViewport || window,
+      gameCols = 19,
+      gameRows = 23,
+      blockSize = Math.max(
+        8,
+        Math.floor(Math.min(viewport.width / gameCols, viewport.height / gameRows)),
+      ),
       canvas = document.createElement("canvas");
 
-    canvas.setAttribute("width", blockSize * 19 + "px");
-    canvas.setAttribute("height", blockSize * 23 + "px");
+    canvas.setAttribute("width", blockSize * gameCols + "px");
+    canvas.setAttribute("height", blockSize * gameRows + "px");
 
     wrapper.appendChild(canvas);
 

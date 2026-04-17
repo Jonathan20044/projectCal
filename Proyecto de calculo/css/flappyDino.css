@@ -1,12 +1,11 @@
 body {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   font-family: Helvetica, sans-serif;
-  overflow-x: hidden;
+  overflow: hidden;
   background-color: #0b0c10;
 }
 
@@ -15,11 +14,13 @@ canvas {
 }
 
 .ctn {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%; /* Will be controlled by JS */
   height: 640px;
-  transform-origin: top center;
-  margin: 0 auto;
+  transform-origin: top left;
+  margin: 0;
 }
 
 #scoreboard {

@@ -9,6 +9,7 @@ body {
   justify-content: center;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   touch-action: none;
 }
@@ -36,16 +37,19 @@ a {
 #pacman {
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 #pacman canvas {
   display: block;
-  width: auto !important;
-  height: 100vh !important;
-  max-height: 100vh;
+  width: auto;
+  height: auto;
+  max-width: 100vw;
+  max-height: 100dvh;
 }
 
 /* ── On-screen D-pad (mobile only) ── */

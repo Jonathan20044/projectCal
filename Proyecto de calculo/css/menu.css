@@ -8,23 +8,27 @@
 
 body {
   margin: 0;
-  padding: 0;
+  padding-top: calc(1rem + env(safe-area-inset-top));
+  padding-right: calc(0.9rem + env(safe-area-inset-right));
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  padding-left: calc(0.9rem + env(safe-area-inset-left));
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-main);
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  min-height: 100dvh;
+  display: block;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   position: relative;
+  box-sizing: border-box;
 }
 
 /* Background Animations */
 .bg-shapes {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
   z-index: -2;
@@ -85,7 +89,8 @@ body {
 
 
 .particles {
-  position: absolute;
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
   z-index: -1;
@@ -111,10 +116,25 @@ body {
 .menu-container {
   width: 100%;
   max-width: 1100px;
-  padding: 2rem;
+  padding: 1.25rem 0.35rem;
   box-sizing: border-box;
   text-align: center;
   z-index: 10;
+  margin: 0 auto;
+  position: relative;
+}
+
+@media (min-width: 769px) {
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+  }
+
+  .menu-container {
+    padding: 2rem;
+  }
 }
 
 /* Header & Logo */
@@ -365,40 +385,86 @@ body {
   }
 
   .logo-holder {
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .menu-container {
+    padding: 0.8rem 0.15rem 1.2rem;
   }
 
   .game-grid {
-    gap: 1.5rem;
+    gap: 1rem;
+    grid-template-columns: 1fr;
   }
 
   .game-card {
-    padding: 25px 15px;
+    padding: 20px 14px;
+    border-radius: 16px;
   }
+
 }
 
 @media (max-width: 480px) {
   .logo {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+    letter-spacing: -1px;
   }
 
   .hint {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .menu-container {
-    padding: 1.5rem;
+    padding: 0.65rem 0.1rem 1rem;
   }
 
   .icon-placeholder {
-    width: 60px;
-    height: 60px;
-    font-size: 2rem;
-    margin-bottom: 1rem;
+    width: 56px;
+    height: 56px;
+    font-size: 1.9rem;
+    margin-bottom: 0.8rem;
   }
 
   .game-card h2 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+  }
+
+  .game-card p {
+    font-size: 0.9rem;
+  }
+
+  .modal-icon-wrap {
+    width: 64px;
+    height: 64px;
+    font-size: 2.2rem;
+    border-radius: 16px;
+  }
+
+  .instruction-box {
+    padding: 0.9rem;
+  }
+
+  .instruction-box h3 {
+    font-size: 1rem;
+  }
+
+  .instruction-box p {
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-holder,
+  .game-card,
+  .shape,
+  .particles {
+    animation: none !important;
+  }
+
+  .game-card {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -418,6 +484,8 @@ body {
   transition: opacity 0.4s ease;
   padding: 1rem;
   box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .modal-overlay.show {
@@ -437,7 +505,10 @@ body {
   transform: scale(0.8) translateY(50px);
   transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
 }
 
 .modal-card::before {
@@ -568,6 +639,8 @@ body {
   border-radius: 30px;
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
   box-shadow: 0 10px 20px rgba(0,0,0,0.3), 0 0 20px rgba(var(--accent), 0.2);
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .play-btn:hover {
@@ -578,4 +651,60 @@ body {
 .play-btn:active {
   transform: translateY(2px) scale(0.98);
   box-shadow: 0 5px 10px rgba(0,0,0,0.4), 0 0 15px var(--accent);
+}
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    align-items: flex-start;
+    padding-top: calc(0.75rem + env(safe-area-inset-top));
+    padding-right: calc(0.75rem + env(safe-area-inset-right));
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    padding-left: calc(0.75rem + env(safe-area-inset-left));
+  }
+
+  .modal-card {
+    width: min(100%, 420px);
+    padding: 1.2rem 1rem;
+    border-radius: 18px;
+    max-height: calc(100dvh - 1.5rem);
+  }
+
+  .modal-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.6rem;
+  }
+
+  .modal-body {
+    gap: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .play-btn {
+    width: 100%;
+    font-size: 1rem;
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-card {
+    width: min(100%, 360px);
+    padding: 1rem 0.85rem;
+    border-radius: 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.45rem;
+  }
+
+  .close-btn {
+    width: 36px;
+    height: 36px;
+    top: 10px;
+    right: 10px;
+    font-size: 1.3rem;
+  }
 }
