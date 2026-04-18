@@ -63,6 +63,7 @@ const introductionElement = document.getElementById("introduction");
 const perfectElement = document.getElementById("perfect");
 const restartButton = document.getElementById("restart");
 const scoreElement = document.getElementById("score");
+const startOverlay = document.getElementById("start-overlay");
 
 // Initialize layout
 initializeGame();
@@ -123,6 +124,14 @@ function showQuestionModal() {
   modal.setAttribute("aria-hidden", "false");
 }
 
+function hideStartOverlay() {
+  if (!startOverlay) {
+    return;
+  }
+  startOverlay.classList.remove("is-visible");
+  startOverlay.setAttribute("aria-hidden", "true");
+}
+
 function generateTree() {
   const minimumGap = 30;
   const maximumGap = 150;
@@ -166,6 +175,7 @@ function generatePlatform() {
 window.addEventListener("keydown", function (event) {
   if (event.key == " ") {
     event.preventDefault();
+    hideStartOverlay();
     resetGame(true);
     return;
   }
@@ -173,6 +183,7 @@ window.addEventListener("keydown", function (event) {
 
 window.addEventListener("mousedown", function (event) {
   if (phase == "waiting") {
+    hideStartOverlay();
     saveCheckpointState();
     lastTimestamp = undefined;
     introductionElement.style.opacity = 0;
@@ -183,6 +194,7 @@ window.addEventListener("mousedown", function (event) {
 
 window.addEventListener("touchstart", function (event) {
   if (phase == "waiting") {
+    hideStartOverlay();
     saveCheckpointState();
     lastTimestamp = undefined;
     introductionElement.style.opacity = 0;
@@ -283,7 +295,7 @@ function animate(timestamp) {
         sticks.push({
           x: nextPlatform.x + nextPlatform.w,
           length: 0,
-          rotation: 0
+          rotation: 0,
         });
         phase = "waiting";
       }
@@ -320,7 +332,7 @@ function thePlatformTheStickHits() {
   const stickFarX = sticks.last().x + sticks.last().length;
 
   const platformTheStickHits = platforms.find(
-    (platform) => platform.x < stickFarX && stickFarX < platform.x + platform.w
+    (platform) => platform.x < stickFarX && stickFarX < platform.x + platform.w,
   );
 
   // If the stick hits the perfect area
@@ -345,7 +357,7 @@ function draw() {
   // Center main canvas area to the middle of the screen
   ctx.translate(
     (window.innerWidth - canvasWidth) / 2 - sceneOffset,
-    (window.innerHeight - canvasHeight) / 2
+    (window.innerHeight - canvasHeight) / 2,
   );
 
   // Draw scene
@@ -371,7 +383,7 @@ function drawPlatforms() {
       x,
       canvasHeight - platformHeight,
       w,
-      platformHeight + (window.innerHeight - canvasHeight) / 2
+      platformHeight + (window.innerHeight - canvasHeight) / 2,
     );
 
     // Draw perfect area only if hero did not yet reach the platform
@@ -381,7 +393,7 @@ function drawPlatforms() {
         x + w / 2 - perfectAreaSize / 2,
         canvasHeight - platformHeight,
         perfectAreaSize,
-        perfectAreaSize
+        perfectAreaSize,
       );
     }
   });
@@ -392,7 +404,7 @@ function drawHero() {
   ctx.fillStyle = "black";
   ctx.translate(
     heroX - heroWidth / 2,
-    heroY + canvasHeight - platformHeight - heroHeight / 2
+    heroY + canvasHeight - platformHeight - heroHeight / 2,
   );
 
   // Body
@@ -401,7 +413,7 @@ function drawHero() {
     -heroHeight / 2,
     heroWidth,
     heroHeight - 4,
-    5
+    5,
   );
 
   // Legs
@@ -503,7 +515,7 @@ function drawTree(x, color) {
   ctx.save();
   ctx.translate(
     (-sceneOffset * backgroundSpeedMultiplier + x) * hill1Stretch,
-    getTreeY(x, hill1BaseHeight, hill1Amplitude)
+    getTreeY(x, hill1BaseHeight, hill1Amplitude),
   );
 
   const treeTrunkHeight = 5;
@@ -517,7 +529,7 @@ function drawTree(x, color) {
     -treeTrunkWidth / 2,
     -treeTrunkHeight,
     treeTrunkWidth,
-    treeTrunkHeight
+    treeTrunkHeight,
   );
 
   // Draw crown
@@ -554,13 +566,15 @@ function saveCheckpointState() {
     lives,
     heroX,
     heroY,
-    sticks
+    sticks,
   };
   localStorage.setItem("stickHeroCheckpointState", JSON.stringify(state));
 }
 
 function restoreCheckpointState(state) {
-  platforms = Array.isArray(state.platforms) ? state.platforms : [{ x: 50, w: 50 }];
+  platforms = Array.isArray(state.platforms)
+    ? state.platforms
+    : [{ x: 50, w: 50 }];
   trees = Array.isArray(state.trees) ? state.trees : [];
   sceneOffset = Number.isFinite(state.sceneOffset) ? state.sceneOffset : 0;
   score = Number.isFinite(state.score) ? state.score : 0;
@@ -649,4 +663,3 @@ function updateLivesDisplay() {
 }
 
 updateLivesDisplay();
-

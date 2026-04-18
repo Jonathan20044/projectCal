@@ -240,6 +240,47 @@ body {
   box-shadow: 0 5px 10px rgba(0,0,0,0.4), 0 0 15px #00E5FF;
 }
 
+#start-overlay {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.start-message {
+  text-align: center;
+  color: #fff;
+  animation: fadeInOut 2s ease-in-out infinite;
+}
+
+.start-message i {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  display: block;
+  background: linear-gradient(135deg, #66ffff, #00E5FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.4));
+}
+
+.start-message p {
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
 #btn-menu {
   position: fixed;
   top: 20px;

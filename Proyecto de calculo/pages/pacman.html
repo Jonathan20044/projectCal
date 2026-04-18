@@ -3,8 +3,12 @@
 <head>
   <title>CodePen - Pacman HTML5</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Permanent+Marker'>
-  <link rel="stylesheet" href="../css/pacman.css">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/pacman.css?v=20260418e">
 </head>
 
 <body>
@@ -14,6 +18,13 @@
 <button id="btn-menu" onclick="window.location.href='../index.html';">
   Regresar al menú
 </button>
+
+<div id="start-overlay" class="modal-overlay is-visible" aria-hidden="false">
+  <div class="start-message">
+    <i class='bx bx-pointer bx-tada'></i>
+    <p>Toca o haz clic para iniciar</p>
+  </div>
+</div>
 
 <div id="pacman"></div>
 
@@ -26,9 +37,7 @@
 </div>
 
 <!-- partial -->
-<script src='https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-<script src="../js/pacman.js"></script>
+<script src="../js/pacman.js?v=20260418e"></script>
 
 </body>
 </html>

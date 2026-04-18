@@ -117,7 +117,7 @@ body {
 
 .option-label {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   padding: 15px 20px;
   background: rgba(255,255,255,0.03);
@@ -143,12 +143,16 @@ body {
 
 /* Custom Radio button */
 .custom-radio {
+  flex: 0 0 24px;
   width: 24px;
   height: 24px;
+  min-width: 24px;
+  min-height: 24px;
   border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.3);
   display: inline-block;
   position: relative;
+  box-sizing: border-box;
   transition: all 0.3s ease;
 }
 
@@ -336,8 +340,11 @@ body {
   }
 
   .custom-radio {
+    flex: 0 0 20px;
     width: 20px;
     height: 20px;
+    min-width: 20px;
+    min-height: 20px;
   }
 
   .submit-btn {

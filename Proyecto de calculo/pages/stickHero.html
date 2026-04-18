@@ -3,7 +3,8 @@
 <head>
   <title>Stick Hero</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link rel="stylesheet" href="../css/stickHero.css">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/stickHero.css?v=20260418a">
 </head>
 
 <body>
@@ -11,6 +12,13 @@
   <button id="btn-menu" onclick="window.location.href='../index.html';">
     Regresar al menú
   </button>
+
+  <div id="start-overlay" class="modal-overlay is-visible" aria-hidden="false">
+    <div class="start-message">
+      <i class='bx bx-pointer bx-tada'></i>
+      <p>Toca o haz clic para iniciar</p>
+    </div>
+  </div>
 
   <div class="container">
     <div id="score"></div>
@@ -28,6 +36,6 @@
     </div>
   </div>
 
-  <script src="../js/stickHero.js"></script>
+  <script src="../js/stickHero.js?v=20260418a"></script>
 </body>
 </html>

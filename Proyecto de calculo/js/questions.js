@@ -17,106 +17,156 @@
 
   const questionsBank = [
     {
-      id: 'q1',
+      id: "q1",
       text: "Pregunta — Valor propio",
-      latex: "A = \\begin{pmatrix} 2 & 0 \\\\ 0 & 3 \\end{pmatrix}\\\\\\text{¿Cuál es un valor propio?}",
+      latex:
+        "A = \\begin{pmatrix} 2 & 0 \\\\ 0 & 3 \\end{pmatrix}\\\\\\text{¿Cuál es un valor propio?}",
       options: ["2", "5", "−1", "4"],
       correct: "2",
       latexOptions: false,
-      procedure: "Los valores propios se calculan con $$det(A − \\lambda I) = 0$$. Restamos $$\\lambda$$ en la diagonal: $$A − \\lambda I = \\begin{pmatrix} 2-\\lambda & 0 \\\\ 0 & 3-\\lambda \\end{pmatrix}$$. El determinante es $$(2−\\lambda)(3−\\lambda) = 0$$. Por lo tanto $$\\lambda = 2$$ o $$\\lambda = 3$$. Entonces <b>2</b> sí es un valor propio."
+      procedure:
+        "Los valores propios se calculan con $$det(A − \\lambda I) = 0$$. Restamos $$\\lambda$$ en la diagonal: $$A − \\lambda I = \\begin{pmatrix} 2-\\lambda & 0 \\\\ 0 & 3-\\lambda \\end{pmatrix}$$. El determinante es $$(2−\\lambda)(3−\\lambda) = 0$$. Por lo tanto $$\\lambda = 2$$ o $$\\lambda = 3$$. Entonces <b>2</b> sí es un valor propio.",
     },
     {
-      id: 'q2',
+      id: "q2",
       text: "Pregunta — Vector propio",
-      latex: "A = \\begin{pmatrix} 4 & 0 \\\\ 0 & 1 \\end{pmatrix}\\\\\\text{Buscamos vector propio para } \\lambda = 4",
+      latex:
+        "A = \\begin{pmatrix} 4 & 0 \\\\ 0 & 1 \\end{pmatrix}\\\\\\text{Buscamos vector propio para } \\lambda = 4",
       options: ["(1,0)", "(0,1)", "(1,1)", "(2,1)"],
       correct: "(1,0)",
       latexOptions: false,
-      procedure: "Un vector propio cumple $$Av = \\lambda v$$. Probamos $$v = (1,0)$$:<br>$$A(1,0) = (4,0)$$<br>$$4(1,0) = (4,0)$$<br>Coincide, entonces <b>(1,0)</b> es el vector propio correcto."
+      procedure:
+        "Un vector propio cumple $$Av = \\lambda v$$. Probamos $$v = (1,0)$$:<br>$$A(1,0) = (4,0)$$<br>$$4(1,0) = (4,0)$$<br>Coincide, entonces <b>(1,0)</b> es el vector propio correcto.",
     },
     {
-      id: 'q3',
+      id: "q3",
       text: "Pregunta — Matriz diagonal",
-      latex: "A = \\begin{pmatrix} 5 & 0 \\\\ 0 & 2 \\end{pmatrix}\\\\\\text{¿Qué es cierto?}",
-      options: ["A ya es diagonal", "A no tiene valores propios", "A no se puede diagonalizar", "A es triangular superior"],
+      latex:
+        "A = \\begin{pmatrix} 5 & 0 \\\\ 0 & 2 \\end{pmatrix}\\\\\\text{¿Qué es cierto?}",
+      options: [
+        "A ya es diagonal",
+        "A no tiene valores propios",
+        "A no se puede diagonalizar",
+        "A es triangular superior",
+      ],
       correct: "A ya es diagonal",
       latexOptions: false,
-      procedure: "Una matriz es diagonal cuando todos los elementos fuera de la diagonal son 0. En esta matriz $$\\begin{pmatrix} 5 & 0 \\\\ 0 & 2 \\end{pmatrix}$$, todos los elementos fuera de la diagonal principal son 0. Por lo tanto <b>A ya es diagonal</b>."
+      procedure:
+        "Una matriz es diagonal cuando todos los elementos fuera de la diagonal son 0. En esta matriz $$\\begin{pmatrix} 5 & 0 \\\\ 0 & 2 \\end{pmatrix}$$, todos los elementos fuera de la diagonal principal son 0. Por lo tanto <b>A ya es diagonal</b>.",
     },
     {
-      id: 'q4',
+      id: "q4",
       text: "Pregunta — Valores propios",
-      latex: "A = \\begin{pmatrix} 1 & 2 \\\\ 2 & 1 \\end{pmatrix}\\\\\\text{¿Cuáles son los valores propios?}",
+      latex:
+        "A = \\begin{pmatrix} 1 & 2 \\\\ 2 & 1 \\end{pmatrix}\\\\\\text{¿Cuáles son los valores propios?}",
       options: ["3 y −1", "1 y 2", "0 y 3", "2 y 2"],
       correct: "3 y −1",
       latexOptions: false,
-      procedure: "Calculamos $$det(A − \\lambda I)$$:<br>$$A − \\lambda I = \\begin{pmatrix} 1-\\lambda & 2 \\\\ 2 & 1-\\lambda \\end{pmatrix}$$<br>$$det = (1−\\lambda)^2 − 4 = \\lambda^2 − 2\\lambda − 3 = (\\lambda−3)(\\lambda+1) = 0$$<br>Por lo tanto $$\\lambda = 3$$ y $$\\lambda = −1$$"
+      procedure:
+        "Calculamos $$det(A − \\lambda I)$$:<br>$$A − \\lambda I = \\begin{pmatrix} 1-\\lambda & 2 \\\\ 2 & 1-\\lambda \\end{pmatrix}$$<br>$$det = (1−\\lambda)^2 − 4 = \\lambda^2 − 2\\lambda − 3 = (\\lambda−3)(\\lambda+1) = 0$$<br>Por lo tanto $$\\lambda = 3$$ y $$\\lambda = −1$$",
     },
     {
-      id: 'q5',
+      id: "q5",
       text: "Pregunta — Vector propio",
-      latex: "A = \\begin{pmatrix} 1 & 2 \\\\ 2 & 1 \\end{pmatrix}\\\\\\text{Vector propio para } \\lambda = 3",
+      latex:
+        "A = \\begin{pmatrix} 1 & 2 \\\\ 2 & 1 \\end{pmatrix}\\\\\\text{Vector propio para } \\lambda = 3",
       options: ["(1,1)", "(1,−1)", "(2,0)", "(0,1)"],
       correct: "(1,1)",
       latexOptions: false,
-      procedure: "Multiplicamos $$A(1,1) = (1·1 + 2·1, 2·1 + 1·1) = (3,3)$$<br>Calculamos $$3(1,1) = (3,3)$$<br>Como coincide $$Av = \\lambda v$$, entonces <b>(1,1)</b> es el vector propio."
+      procedure:
+        "Multiplicamos $$A(1,1) = (1·1 + 2·1, 2·1 + 1·1) = (3,3)$$<br>Calculamos $$3(1,1) = (3,3)$$<br>Como coincide $$Av = \\lambda v$$, entonces <b>(1,1)</b> es el vector propio.",
     },
     {
-      id: 'q6',
+      id: "q6",
       text: "Pregunta — ¿Es diagonalizable?",
-      latex: "A = \\begin{pmatrix} 2 & 0 \\\\ 0 & 7 \\end{pmatrix}\\\\\\text{¿Se puede diagonalizar?}",
-      options: ["Sí, porque tiene valores propios distintos", "No, porque su determinante no es cero", "No, porque es cuadrada", "No, porque es diagonal"],
+      latex:
+        "A = \\begin{pmatrix} 2 & 0 \\\\ 0 & 7 \\end{pmatrix}\\\\\\text{¿Se puede diagonalizar?}",
+      options: [
+        "Sí, porque tiene valores propios distintos",
+        "No, porque su determinante no es cero",
+        "No, porque es cuadrada",
+        "No, porque es diagonal",
+      ],
       correct: "Sí, porque tiene valores propios distintos",
       latexOptions: false,
-      procedure: "Los valores propios son $$\\lambda = 2$$ y $$\\lambda = 7$$. Cuando una matriz tiene valores propios distintos, entonces es diagonalizable. La respuesta es <b>Sí, porque tiene valores propios distintos</b>."
+      procedure:
+        "Los valores propios son $$\\lambda = 2$$ y $$\\lambda = 7$$. Cuando una matriz tiene valores propios distintos, entonces es diagonalizable. La respuesta es <b>Sí, porque tiene valores propios distintos</b>.",
     },
     {
-      id: 'q7',
+      id: "q7",
       text: "Pregunta — Matriz D",
-      latex: "\\text{Si } A = \\begin{pmatrix} 3 & 0 \\\\ 0 & 6 \\end{pmatrix} \\text{ y } A = PDP^{-1}\\\\\\text{¿Cuál es la matriz D?}",
-      options: ["\\begin{pmatrix} 3 & 0 \\\\ 0 & 6 \\end{pmatrix}", "\\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}", "\\begin{pmatrix} 0 & 3 \\\\ 6 & 0 \\end{pmatrix}", "\\begin{pmatrix} 6 & 0 \\\\ 0 & 3 \\end{pmatrix}"],
+      latex:
+        "\\text{Si } A = \\begin{pmatrix} 3 & 0 \\\\ 0 & 6 \\end{pmatrix} \\text{ y } A = PDP^{-1}\\\\\\text{¿Cuál es la matriz D?}",
+      options: [
+        "\\begin{pmatrix} 3 & 0 \\\\ 0 & 6 \\end{pmatrix}",
+        "\\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}",
+        "\\begin{pmatrix} 0 & 3 \\\\ 6 & 0 \\end{pmatrix}",
+        "\\begin{pmatrix} 6 & 0 \\\\ 0 & 3 \\end{pmatrix}",
+      ],
       correct: "\\begin{pmatrix} 3 & 0 \\\\ 0 & 6 \\end{pmatrix}",
       latexOptions: true,
-      procedure: "La matriz D contiene los valores propios en la diagonal. Los valores propios de A son 3 y 6. Por lo tanto:<br>$$D = \\begin{pmatrix} 3 & 0 \\\\ 0 & 6 \\end{pmatrix}$$"
+      procedure:
+        "La matriz D contiene los valores propios en la diagonal. Los valores propios de A son 3 y 6. Por lo tanto:<br>$$D = \\begin{pmatrix} 3 & 0 \\\\ 0 & 6 \\end{pmatrix}$$",
     },
     {
-      id: 'q8',
+      id: "q8",
       text: "Pregunta — Polinomio característico",
-      latex: "A = \\begin{pmatrix} 2 & 1 \\\\ 0 & 2 \\end{pmatrix}\\\\\\text{¿Cuál es el polinomio característico?}",
-      options: ["(2 − \\lambda)^{2}", "(1 − \\lambda)(2 − \\lambda)", "\\lambda^{2} − 5", "(2 + \\lambda)^{2}"],
+      latex:
+        "A = \\begin{pmatrix} 2 & 1 \\\\ 0 & 2 \\end{pmatrix}\\\\\\text{¿Cuál es el polinomio característico?}",
+      options: [
+        "(2 − \\lambda)^{2}",
+        "(1 − \\lambda)(2 − \\lambda)",
+        "\\lambda^{2} − 5",
+        "(2 + \\lambda)^{2}",
+      ],
       correct: "(2 − \\lambda)^{2}",
       latexOptions: true,
-      procedure: "$$A − \\lambda I = \\begin{pmatrix} 2-\\lambda & 1 \\\\ 0 & 2-\\lambda \\end{pmatrix}$$<br>$$det(A − \\lambda I) = (2−\\lambda)(2−\\lambda) − 0 = (2−\\lambda)^2$$"
+      procedure:
+        "$$A − \\lambda I = \\begin{pmatrix} 2-\\lambda & 1 \\\\ 0 & 2-\\lambda \\end{pmatrix}$$<br>$$det(A − \\lambda I) = (2−\\lambda)(2−\\lambda) − 0 = (2−\\lambda)^2$$",
     },
     {
-      id: 'q9',
+      id: "q9",
       text: "Pregunta — ¿Es diagonalizable?",
-      latex: "A = \\begin{pmatrix} 2 & 1 \\\\ 0 & 2 \\end{pmatrix}\\\\\\text{¿Se puede diagonalizar?}",
-      options: ["Sí", "No, porque solo tiene un vector propio", "Sí porque es triangular", "No, porque es de orden 2"],
+      latex:
+        "A = \\begin{pmatrix} 2 & 1 \\\\ 0 & 2 \\end{pmatrix}\\\\\\text{¿Se puede diagonalizar?}",
+      options: [
+        "Sí",
+        "No, porque solo tiene un vector propio",
+        "Sí porque es triangular",
+        "No, porque es de orden 2",
+      ],
       correct: "No, porque solo tiene un vector propio",
       latexOptions: false,
-      procedure: "El valor propio es $$\\lambda = 2$$. Al resolver $$(A − 2I)v = 0$$ solo aparece un vector propio independiente. Para diagonalizar una matriz 2×2 se necesitan dos vectores propios independientes. Por eso <b>No es diagonalizable</b>."
-    }
+      procedure:
+        "El valor propio es $$\\lambda = 2$$. Al resolver $$(A − 2I)v = 0$$ solo aparece un vector propio independiente. Para diagonalizar una matriz 2×2 se necesitan dos vectores propios independientes. Por eso <b>No es diagonalizable</b>.",
+    },
   ];
 
   // Randomize exactly ONE question from the bank
-  var currentQuestion = questionsBank[Math.floor(Math.random() * questionsBank.length)];
+  var currentQuestion =
+    questionsBank[Math.floor(Math.random() * questionsBank.length)];
 
   // Shuffle options but keep track of correct answer
-  const shuffledOptions = currentQuestion.options.sort(() => Math.random() - 0.5);
+  const shuffledOptions = currentQuestion.options.sort(
+    () => Math.random() - 0.5,
+  );
 
   // Inject the question dynamically into the HTML
   dynamicContainer.innerHTML = `
     <legend id="q-legend">${currentQuestion.text}</legend>
     <div id="latex-question" class="latex-container"></div>
     <div class="options-grid" id="options-grid">
-      ${shuffledOptions.map((opt, idx) => `
+      ${shuffledOptions
+        .map(
+          (opt, idx) => `
         <label class="option-label">
           <input type="radio" name="answer" value="${opt}" data-index="${idx}" required>
           <span class="custom-radio"></span> 
           <span class="option-text" id="opt-${idx}">${opt}</span>
         </label>
-      `).join('')}
+      `,
+        )
+        .join("")}
     </div>
   `;
 
@@ -124,26 +174,30 @@
   setTimeout(() => {
     if (window.katex) {
       try {
-        katex.render(currentQuestion.latex, document.getElementById('latex-question'), {
-          throwOnError: false,
-          displayMode: true
-        });
+        katex.render(
+          currentQuestion.latex,
+          document.getElementById("latex-question"),
+          {
+            throwOnError: false,
+            displayMode: true,
+          },
+        );
       } catch (e) {
-        console.error('Error rendering question LaTeX:', e);
+        console.error("Error rendering question LaTeX:", e);
       }
 
       // Renderizar opciones si contienen LaTeX
       shuffledOptions.forEach((opt, idx) => {
         const el = document.getElementById(`opt-${idx}`);
-        if (el && (opt.includes('\\') || opt.includes('^'))) {
+        if (el && (opt.includes("\\") || opt.includes("^"))) {
           try {
-            el.innerHTML = '';
+            el.innerHTML = "";
             katex.render(opt, el, {
               throwOnError: false,
-              displayMode: false
+              displayMode: false,
             });
           } catch (e) {
-            console.log('LaTeX render error for option', idx);
+            console.log("LaTeX render error for option", idx);
           }
         }
       });
@@ -174,28 +228,33 @@
       resultIcon.className = "result-icon success";
       resultTitle.textContent = "¡Respuesta Correcta!";
       resultTitle.style.color = "#00FF66";
-      resultMessage.textContent = "¡Magistral! Tu conocimiento está intacto, tienes permiso para continuar la partida ahora mismo.";
+      resultMessage.textContent =
+        "¡Magistral! Tu conocimiento está intacto, tienes permiso para continuar la partida ahora mismo.";
 
       procedureBox.hidden = true;
-      continueBtn.innerHTML = "Continuar Partida <i class='bx bx-space-bar'></i>";
-
+      continueBtn.innerHTML =
+        "Continuar Partida <i class='bx bx-space-bar'></i>";
     } else {
       resultIcon.innerHTML = "<i class='bx bx-x-circle'></i>";
       resultIcon.className = "result-icon error";
       resultTitle.textContent = "Respuesta Incorrecta";
       resultTitle.style.color = "#FF0055";
-resultMessage.textContent = "Has fallado. Pierdes una vida, pero puedes continuar la partida.";
+      resultMessage.textContent =
+        "Has fallado. Pierdes una vida, pero puedes continuar la partida.";
       procedureBox.hidden = false;
-      procedureText.innerHTML = '';
+      procedureText.innerHTML = "";
 
       // Crear contenedor para renderizar la opción seleccionada
-      let selectedContainer = document.createElement('span');
-      let correctContainer = document.createElement('span');
+      let selectedContainer = document.createElement("span");
+      let correctContainer = document.createElement("span");
 
       // Renderizar opción seleccionada si tiene LaTeX
-      if (val.includes('\\') || val.includes('^')) {
+      if (val.includes("\\") || val.includes("^")) {
         try {
-          katex.render(val, selectedContainer, { displayMode: false, throwOnError: false });
+          katex.render(val, selectedContainer, {
+            displayMode: false,
+            throwOnError: false,
+          });
         } catch (e) {
           selectedContainer.textContent = val;
         }
@@ -204,9 +263,15 @@ resultMessage.textContent = "Has fallado. Pierdes una vida, pero puedes continua
       }
 
       // Renderizar opción correcta si tiene LaTeX
-      if (currentQuestion.correct.includes('\\') || currentQuestion.correct.includes('^')) {
+      if (
+        currentQuestion.correct.includes("\\") ||
+        currentQuestion.correct.includes("^")
+      ) {
         try {
-          katex.render(currentQuestion.correct, correctContainer, { displayMode: false, throwOnError: false });
+          katex.render(currentQuestion.correct, correctContainer, {
+            displayMode: false,
+            throwOnError: false,
+          });
         } catch (e) {
           correctContainer.textContent = currentQuestion.correct;
         }
@@ -215,28 +280,30 @@ resultMessage.textContent = "Has fallado. Pierdes una vida, pero puedes continua
       }
 
       // Crear texto de intro
-      let introDiv = document.createElement('div');
-      introDiv.appendChild(document.createTextNode('Seleccionaste '));
+      let introDiv = document.createElement("div");
+      introDiv.appendChild(document.createTextNode("Seleccionaste "));
 
-      let selectedBold = document.createElement('b');
+      let selectedBold = document.createElement("b");
       selectedBold.appendChild(selectedContainer);
       introDiv.appendChild(selectedBold);
 
-      introDiv.appendChild(document.createTextNode(', pero la respuesta correcta era '));
+      introDiv.appendChild(
+        document.createTextNode(", pero la respuesta correcta era "),
+      );
 
-      let correctBold = document.createElement('b');
+      let correctBold = document.createElement("b");
       correctBold.appendChild(correctContainer);
       introDiv.appendChild(correctBold);
 
-      introDiv.appendChild(document.createTextNode('.'));
+      introDiv.appendChild(document.createTextNode("."));
       procedureText.appendChild(introDiv);
 
       // Insertar salto de línea
-      procedureText.appendChild(document.createElement('br'));
-      procedureText.appendChild(document.createElement('br'));
+      procedureText.appendChild(document.createElement("br"));
+      procedureText.appendChild(document.createElement("br"));
 
       // Insertar el procedimiento
-      let procDiv = document.createElement('div');
+      let procDiv = document.createElement("div");
       procDiv.innerHTML = currentQuestion.procedure;
       procedureText.appendChild(procDiv);
 
@@ -247,26 +314,27 @@ resultMessage.textContent = "Has fallado. Pierdes una vida, pero puedes continua
             let html = procDiv.innerHTML;
 
             // Reemplazar entidades HTML
-            html = html.replace(/&amp;/g, '&')
-              .replace(/&lt;/g, '<')
-              .replace(/&gt;/g, '>')
+            html = html
+              .replace(/&amp;/g, "&")
+              .replace(/&lt;/g, "<")
+              .replace(/&gt;/g, ">")
               .replace(/&quot;/g, '"')
               .replace(/&#039;/g, "'");
 
             const regex = /\$\$([\s\S]*?)\$\$/g;
             let lastIndex = 0;
-            let newHtml = '';
+            let newHtml = "";
             let match;
 
             while ((match = regex.exec(html)) !== null) {
               newHtml += html.substring(lastIndex, match.index);
 
-              let span = document.createElement('span');
+              let span = document.createElement("span");
               try {
                 katex.render(match[1], span, {
                   displayMode: true,
                   throwOnError: false,
-                  strict: false
+                  strict: false,
                 });
                 newHtml += span.innerHTML;
               } catch (e) {
@@ -276,9 +344,8 @@ resultMessage.textContent = "Has fallado. Pierdes una vida, pero puedes continua
             }
             newHtml += html.substring(lastIndex);
             procDiv.innerHTML = newHtml;
-
           } catch (e) {
-            console.log('Error rendering procedure LaTeX:', e);
+            console.log("Error rendering procedure LaTeX:", e);
           }
         }
       }, 150);
@@ -289,12 +356,12 @@ resultMessage.textContent = "Has fallado. Pierdes una vida, pero puedes continua
       continueBtn.style.boxShadow = "0 10px 20px rgba(255,0,85,0.3)";
     }
 
-    localStorage.setItem('lastAnswerCorrect', isCorrect.toString());
+    localStorage.setItem("lastAnswerCorrect", isCorrect.toString());
   });
 
   // Handle Navigation returning to game
   continueBtn.addEventListener("click", function () {
-    var correct = localStorage.getItem('lastAnswerCorrect') === 'true';
+    var correct = localStorage.getItem("lastAnswerCorrect") === "true";
 
     if (source === "pacman") {
       if (correct) {
@@ -314,7 +381,7 @@ resultMessage.textContent = "Has fallado. Pierdes una vida, pero puedes continua
         localStorage.removeItem("flappyResume");
         localStorage.setItem("flappyRestart", "true");
       }
-      window.location.href = "flappy.html";
+      window.location.href = "flappyDino.html";
       return;
     }
 

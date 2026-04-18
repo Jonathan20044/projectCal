@@ -284,3 +284,23 @@ body {
 #btn-menu:active {
   transform: scale(0.95);
 }
+
+@media (max-width: 768px) {
+  #btn-menu {
+    top: calc(12px + env(safe-area-inset-top));
+    left: calc(12px + env(safe-area-inset-left));
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  #hud {
+    top: calc(72px + env(safe-area-inset-top));
+    gap: 0.8rem;
+  }
+
+  #score-box,
+  #level-box {
+    padding: 6px 14px;
+    font-size: 0.92rem;
+  }
+}

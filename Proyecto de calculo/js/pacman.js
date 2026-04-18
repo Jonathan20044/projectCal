@@ -21,6 +21,31 @@ var NONE = 4,
   DYING = 10,
   Pacman = {};
 
+function hasCanvasSupport() {
+  var canvas = document.createElement("canvas");
+  return !!(canvas && typeof canvas.getContext === "function");
+}
+
+function getAudioExtension() {
+  var audio = document.createElement("audio");
+
+  if (!audio || typeof audio.canPlayType !== "function") {
+    return null;
+  }
+
+  var canOgg = audio.canPlayType('audio/ogg; codecs="vorbis"');
+  if (canOgg && canOgg !== "no") {
+    return "ogg";
+  }
+
+  var canMp3 = audio.canPlayType("audio/mpeg;");
+  if (canMp3 && canMp3 !== "no") {
+    return "mp3";
+  }
+
+  return null;
+}
+
 Pacman.FPS = 30;
 
 Pacman.Ghost = function (game, map, colour) {
@@ -178,7 +203,7 @@ Pacman.Ghost = function (game, map, colour) {
     ctx.closePath();
     ctx.fill();
 
-    var eyeRadius = s / 6;      // scales with block size
+    var eyeRadius = s / 6; // scales with block size
     var pupilRadius = s / 15;
     var eyeOffsetX = s * 0.25;
     var eyeOffsetY = s * 0.3;
@@ -186,8 +211,22 @@ Pacman.Ghost = function (game, map, colour) {
     // White of eyes
     ctx.beginPath();
     ctx.fillStyle = "#FFF";
-    ctx.arc(left + eyeOffsetX, top + eyeOffsetY, eyeRadius, 0, Math.PI * 2, false);
-    ctx.arc(left + s - eyeOffsetX, top + eyeOffsetY, eyeRadius, 0, Math.PI * 2, false);
+    ctx.arc(
+      left + eyeOffsetX,
+      top + eyeOffsetY,
+      eyeRadius,
+      0,
+      Math.PI * 2,
+      false,
+    );
+    ctx.arc(
+      left + s - eyeOffsetX,
+      top + eyeOffsetY,
+      eyeRadius,
+      0,
+      Math.PI * 2,
+      false,
+    );
     ctx.closePath();
     ctx.fill();
 
@@ -872,44 +911,53 @@ var PACMAN = (function () {
     questionActive = true;
   }
 
-  function answerCorrect() {
-  var resumeRaw = localStorage.getItem("pacmanResume");
-
-  if (resumeRaw) {
-    var resumeData = JSON.parse(resumeRaw);
-
-    level = resumeData.level || 1;
-
-    user.reset();
-    user.setLives(resumeData.lives);
-    user.setScore(resumeData.score);
-
-    map.reset();
-    map.draw(ctx);
-
-    startLevel();
+  function hideStartOverlay() {
+    var overlay = document.getElementById("start-overlay");
+    if (!overlay) {
+      return;
+    }
+    overlay.classList.remove("is-visible");
+    overlay.setAttribute("aria-hidden", "true");
   }
 
-  localStorage.removeItem("pacmanResume");
+  function answerCorrect() {
+    var resumeRaw = localStorage.getItem("pacmanResume");
 
-  var modal = document.getElementById("question-modal");
-  modal.classList.remove("is-visible");
-  modal.setAttribute("aria-hidden", "true");
+    if (resumeRaw) {
+      var resumeData = JSON.parse(resumeRaw);
 
-  questionActive = false;
-}
+      level = resumeData.level || 1;
 
-function answerWrong() {
-  localStorage.removeItem("pacmanResume");
+      user.reset();
+      user.setLives(resumeData.lives);
+      user.setScore(resumeData.score);
 
-  var modal = document.getElementById("question-modal");
-  modal.classList.remove("is-visible");
-  modal.setAttribute("aria-hidden", "true");
+      map.reset();
+      map.draw(ctx);
 
-  questionActive = false;
+      startLevel();
+    }
 
-  startNewGame(); 
-}
+    localStorage.removeItem("pacmanResume");
+
+    var modal = document.getElementById("question-modal");
+    modal.classList.remove("is-visible");
+    modal.setAttribute("aria-hidden", "true");
+
+    questionActive = false;
+  }
+
+  function answerWrong() {
+    localStorage.removeItem("pacmanResume");
+
+    var modal = document.getElementById("question-modal");
+    modal.classList.remove("is-visible");
+    modal.setAttribute("aria-hidden", "true");
+
+    questionActive = false;
+
+    startNewGame();
+  }
 
   function saveResumeState() {
     var payload = {
@@ -935,6 +983,7 @@ function answerWrong() {
   }
 
   function startNewGame() {
+    hideStartOverlay();
     setState(WAITING);
     level = 1;
     user.reset();
@@ -950,6 +999,7 @@ function answerWrong() {
       return false;
     }
     if (e.keyCode === KEY.N) {
+      hideStartOverlay();
       startNewGame();
     } else if (e.keyCode === KEY.S) {
       audio.disableSound();
@@ -970,28 +1020,28 @@ function answerWrong() {
     return true;
   }
 
- function loseLife() {
-  setState(WAITING);
-  user.loseLife(); 
+  function loseLife() {
+    setState(WAITING);
+    user.loseLife();
 
-  audio.pause();
-  map.draw(ctx);
-  if (user.getLives() <= 0) {
-    dialog("Game Over");
+    audio.pause();
+    map.draw(ctx);
+    if (user.getLives() <= 0) {
+      dialog("Game Over");
 
-    setTimeout(function () {
-      startNewGame(); 
-    }, 1500);
+      setTimeout(function () {
+        startNewGame();
+      }, 1500);
 
-    return; // 
+      return; //
+    }
+
+    dialog("Responde la pregunta");
+    setState(PAUSE);
+
+    saveResumeState();
+    showQuestionModal();
   }
-
-  dialog("Responde la pregunta");
-  setState(PAUSE);
-
-  saveResumeState();
-  showQuestionModal();
-}
 
   function setState(nState) {
     state = nState;
@@ -1008,7 +1058,7 @@ function answerWrong() {
   function drawFooter() {
     var topLeft = map.height * map.blockSize;
     var footerHeight = map.blockSize;
-    var textBase = topLeft + (footerHeight * 0.65);
+    var textBase = topLeft + footerHeight * 0.65;
     var iconSize = footerHeight * 0.4; // Radius
     var iconPadding = footerHeight * 1.2; // Distance between icons
 
@@ -1023,7 +1073,11 @@ function answerWrong() {
     // Draw Level (Right aligned)
     var levelText = "Nivel: " + level;
     var levelWidth = ctx.measureText(levelText).width;
-    ctx.fillText(levelText, (map.width * map.blockSize) - levelWidth - (map.blockSize * 0.5), textBase);
+    ctx.fillText(
+      levelText,
+      map.width * map.blockSize - levelWidth - map.blockSize * 0.5,
+      textBase,
+    );
 
     // Draw Lives (Centered)
     var lives = user.getLives();
@@ -1040,7 +1094,7 @@ function answerWrong() {
         iconSize,
         Math.PI * 0.25,
         Math.PI * 1.75,
-        false
+        false,
       );
       ctx.fill();
     }
@@ -1179,7 +1233,9 @@ function answerWrong() {
       gameRows = 23,
       blockSize = Math.max(
         8,
-        Math.floor(Math.min(viewport.width / gameCols, viewport.height / gameRows)),
+        Math.floor(
+          Math.min(viewport.width / gameCols, viewport.height / gameRows),
+        ),
       ),
       canvas = document.createElement("canvas");
 
@@ -1208,7 +1264,12 @@ function answerWrong() {
     map.draw(ctx);
     dialog("Cargando ...");
 
-    var extension = Modernizr.audio.ogg ? "ogg" : "mp3";
+    var extension = getAudioExtension();
+
+    if (!extension) {
+      loaded();
+      return;
+    }
 
     var audio_files = [
       ["start", root + "audio/opening_song." + extension],
@@ -1219,8 +1280,23 @@ function answerWrong() {
       ["eating2", root + "audio/eating.short." + extension],
     ];
 
-    load(audio_files, function () {
+    var bootReady = false;
+
+    function bootGame() {
+      if (bootReady) {
+        return;
+      }
+      bootReady = true;
       loaded();
+    }
+
+    // Some mobile browsers never finish canplaythrough for cross-origin audio.
+    // Avoid locking the game in "Cargando..." by using a short fallback timer.
+    var bootFallback = window.setTimeout(bootGame, 1200);
+
+    load(audio_files, function () {
+      window.clearTimeout(bootFallback);
+      bootGame();
     });
   }
 
@@ -1243,14 +1319,25 @@ function answerWrong() {
 
     // Tap or click to start
     var wrapper = document.getElementById("pacman");
+    var startOverlay = document.getElementById("start-overlay");
+
     function handleStartTap(e) {
       if (state === WAITING) {
         e.preventDefault();
+        hideStartOverlay();
         startNewGame();
       }
     }
+
     wrapper.addEventListener("click", handleStartTap, false);
     wrapper.addEventListener("touchend", handleStartTap, false);
+
+    if (startOverlay) {
+      startOverlay.addEventListener("click", handleStartTap, false);
+      startOverlay.addEventListener("touchstart", handleStartTap, {
+        passive: false,
+      });
+    }
 
     timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
 
@@ -1263,6 +1350,7 @@ function answerWrong() {
 
     if (restart) {
       localStorage.removeItem("pacmanResume");
+      hideStartOverlay();
       startNewGame();
       return;
     }
@@ -1276,16 +1364,17 @@ function answerWrong() {
       user.setScore(resumeData.score || 0);
       map.reset();
       map.draw(ctx);
+      hideStartOverlay();
       startLevel();
       return;
     }
   }
 
- return {
-  init: init,
-  answerCorrect: answerCorrect,
-  answerWrong: answerWrong
-};
+  return {
+    init: init,
+    answerCorrect: answerCorrect,
+    answerWrong: answerWrong,
+  };
 })();
 
 /* Human readable keyCode index */
@@ -1608,27 +1697,60 @@ Object.prototype.clone = function () {
   return newObj;
 };
 
-$(function () {
+function initPacmanPage() {
   var el = document.getElementById("pacman");
 
-  if (
-    Modernizr.canvas &&
-    Modernizr.localstorage &&
-    Modernizr.audio &&
-    (Modernizr.audio.ogg || Modernizr.audio.mp3)
-  ) {
-    window.setTimeout(function () {
+  if (!el) {
+    return;
+  }
+
+  if (!hasCanvasSupport()) {
+    el.innerHTML =
+      "Lo siento, necesitas un buen navegador<br /><small>" +
+      "(firefox 3.6+, Chrome 4+, Opera 10+ and Safari 4+)</small>";
+    return;
+  }
+
+  if (el.dataset.pacmanInitialized === "true") {
+    return;
+  }
+
+  el.dataset.pacmanInitialized = "true";
+
+  window.setTimeout(function () {
+    try {
       PACMAN.init(
         el,
         "https://raw.githubusercontent.com/daleharvey/pacman/master/",
       );
-    }, 0);
-  } else {
-    el.innerHTML =
-      "Lo siento, necesitas un buen navegador<br /><small>" +
-      "(firefox 3.6+, Chrome 4+, Opera 10+ and Safari 4+)</small>";
+    } catch (e) {
+      el.dataset.pacmanInitialized = "false";
+    }
+  }, 0);
+}
+
+function ensurePacmanInitialized() {
+  var el = document.getElementById("pacman");
+
+  if (!el) {
+    return;
   }
-});
+
+  if (!el.querySelector("canvas")) {
+    el.dataset.pacmanInitialized = "false";
+    initPacmanPage();
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initPacmanPage);
+} else {
+  initPacmanPage();
+}
+
+window.addEventListener("load", ensurePacmanInitialized);
+window.addEventListener("pageshow", ensurePacmanInitialized);
+window.addEventListener("focus", ensurePacmanInitialized);
 
 // Mobile Swipe Control
 var xDown = null;
@@ -1640,7 +1762,7 @@ function getTouches(evt) {
 
 function handleTouchStart(evt) {
   // Don't prevent default on links (modal buttons)
-  if (evt.target.nodeName === 'A' || evt.target.nodeName === 'BUTTON') return;
+  if (evt.target.nodeName === "A" || evt.target.nodeName === "BUTTON") return;
   evt.preventDefault();
   const firstTouch = evt.touches[0];
   xDown = firstTouch.clientX;
@@ -1667,7 +1789,11 @@ function handleTouchMove(evt) {
   }
 
   // Dispatch a native KeyboardEvent so it works without jQuery
-  var e = new KeyboardEvent('keydown', { keyCode: keyCode, which: keyCode, bubbles: true });
+  var e = new KeyboardEvent("keydown", {
+    keyCode: keyCode,
+    which: keyCode,
+    bubbles: true,
+  });
   document.dispatchEvent(e);
 
   // Reset so the next swipe starts fresh
@@ -1675,7 +1801,5 @@ function handleTouchMove(evt) {
   yDown = null;
 }
 
-document.addEventListener('touchstart', handleTouchStart, { passive: false });
-document.addEventListener('touchmove', handleTouchMove, { passive: false });
-
-
+document.addEventListener("touchstart", handleTouchStart, { passive: false });
+document.addEventListener("touchmove", handleTouchMove, { passive: false });
