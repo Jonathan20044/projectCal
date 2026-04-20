@@ -1167,7 +1167,6 @@ var PACMAN = (function () {
     } else if (state === WAITING && stateChanged) {
       stateChanged = false;
       map.draw(ctx);
-      dialog("Toca la pantalla o presiona N para iniciar");
     } else if (state === EATEN_PAUSE && tick - timerStart > Pacman.FPS / 3) {
       map.draw(ctx);
       setState(PLAYING);
@@ -1312,8 +1311,6 @@ var PACMAN = (function () {
   }
 
   function loaded() {
-    dialog("Toca la pantalla o presiona N para iniciar");
-
     document.addEventListener("keydown", keyDown, true);
     document.addEventListener("keypress", keyPress, true);
 

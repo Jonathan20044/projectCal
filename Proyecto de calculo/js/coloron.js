@@ -473,8 +473,6 @@ class Game {
 
     if (this.isRunning) {
       this.stop();
-    } else {
-      this.intro();
     }
   }
 
@@ -977,13 +975,13 @@ $(document).ready(function () {
       localStorage.removeItem("coloronPaused");
       localStorage.removeItem("coloronCheckpointState");
       localStorage.removeItem("coloronSkipNextCheck");
-      game.intro();
+      game.start();
     }
   } else {
     localStorage.removeItem("coloronPaused");
     localStorage.removeItem("coloronCheckpointState");
     localStorage.removeItem("coloronSkipNextCheck");
-    game.intro();
+    game.start();
   }
 
   if ($(window).height() < 480) {

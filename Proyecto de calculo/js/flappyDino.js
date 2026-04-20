@@ -248,7 +248,11 @@ function playerInput() {
     start = true;
     velocity = lift;
     dinoAngle = -20;
-    document.getElementById("ctrl-ctn").style.opacity = 0;
+    var ctrl = document.getElementById("ctrl-ctn");
+    if (ctrl) {
+      ctrl.style.opacity = 0;
+    }
+    hideStartOverlay();
   } else {
     if (!gameOver) {
       velocity = lift;
@@ -308,7 +312,10 @@ function replay() {
 
   generateInitialBones();
 
-  document.getElementById("ctrl-ctn").style.opacity = 1;
+  var ctrl = document.getElementById("ctrl-ctn");
+  if (ctrl) {
+    ctrl.style.opacity = 1;
+  }
 
   document.getElementById("gameover-screen").style.visibility = "hidden";
   document.getElementById("gameover-screen").style.opacity = 0;
@@ -328,6 +335,15 @@ function showQuestionModal() {
   }
   modal.classList.add("is-visible");
   modal.setAttribute("aria-hidden", "false");
+}
+
+function hideStartOverlay() {
+  var overlay = document.getElementById("start-overlay");
+  if (!overlay) {
+    return;
+  }
+  overlay.classList.remove("is-visible");
+  overlay.setAttribute("aria-hidden", "true");
 }
 
 function update() {
