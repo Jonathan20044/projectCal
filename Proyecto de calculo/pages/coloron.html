@@ -1,117 +1,133 @@
 <!DOCTYPE html>
-<html lang="es" >
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-    <title>Coloron - Arcade Hub</title>
-  <meta charset="utf-8">
-<meta http-equiv="x-ua-compatible" content="ie=edge">
-<title>Coloron - Arcade Hub</title>
-<meta name="description" content="Juego Coloron de reflejos y colores en Arcade Hub">
-<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
-<meta name="apple-mobile-web-app-capable" content="yes"> 
-
-<link rel="apple-touch-icon" href="https://greghub.github.io/coloron/public/images/touch-icon-iphone.png">
-<link rel="apple-touch-icon" sizes="76x76" href="https://greghub.github.io/coloron/public/images/touch-icon-ipad.png">
-<link rel="apple-touch-icon" sizes="120x120" href="https://greghub.github.io/coloron/public/images/touch-icon-iphone-retina.png">
-<link rel="apple-touch-icon" sizes="152x152" href="https://greghub.github.io/coloron/public/images/touch-icon-ipad-retina.png">
-
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@CodePen">
-<meta name="twitter:title" content="Coloron - Arcade Hub">
-<meta name="twitter:description" content="Juego Coloron de reflejos y colores en Arcade Hub">
-<meta name="twitter:creator" content="@greghvns">
-<meta name="twitter:image" content="https://greghub.github.io/coloron/public/images/coloron-image.png">
-
-<meta property="og:image" content="https://greghub.github.io/coloron/public/images/coloron-image.png">
-<meta property="og:title" content="Coloron - Arcade Hub">
-<meta property="og:url" content="https://codepen.io/gregh/pen/yVLOyO">
-<meta property="og:site_name" content="CodePen">
-<meta property="og:description" content="Juego Coloron de reflejos y colores en Arcade Hub"><link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:400,700,900'>
-<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css'><link rel="stylesheet" href="../css/coloron.css?v=20260418c">
-
+  <title>Orbit Rift - Arcade Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/coloron.css?v=20260420a">
 </head>
+
 <body>
-<!-- partial:index.partial.html -->
-<!--
-design by https://www.behance.net/vahanhovh
--->
-<a class="back-home-btn" href="../index.html">Regresar al inicio</a>
-<div class="splash"></div>
-<div class="container">
+  <button id="btn-menu" data-menu-exit>
+    Regresar al menu
+  </button>
 
-            <div class="stop-game game-full-flex">
+  <div id="start-overlay" class="modal-overlay is-visible" aria-hidden="false">
+    <div class="start-message">
+      <i class='bx bx-pointer bx-tada'></i>
+      <p>Toca o haz clic para iniciar</p>
+    </div>
+  </div>
 
-                <div class="score-container">
+  <div id="question-modal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-icon-wrap danger">
+        <i class='bx bxs-error'></i>
+      </div>
+      <h2>Orbita desestabilizada</h2>
+      <p>Responde una pregunta de matematicas para continuar.</p>
+      <a class="modal-btn danger-btn" href="questions.html?source=coloron">Responder y continuar</a>
+    </div>
+  </div>
 
-                    <h1>Coloron</h1>
+  <div id="menu-confirm-modal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <h2>Volver al menu</h2>
+      <p>Si sales ahora, perderas los puntos actuales.</p>
+      <a class="modal-btn" href="../index.html" id="confirm-menu-exit">Si, volver al menu</a>
+      <a class="modal-btn" href="#" id="cancel-menu-exit">Cancelar</a>
+    </div>
+  </div>
 
-                    <div class="final-score"></div>
-                    <div class="result"></div>
+  <canvas id="game-canvas"></canvas>
 
-                    <h4>Comparte y reta a tus amigos</h4>
+  <div id="hud">
+    <div id="score-box">Puntos <span id="score">0</span></div>
+    <div id="level-box">Nivel <span id="level">1</span></div>
+    <div id="lives-box">Vidas <span id="lives">3</span></div>
+  </div>
 
-                    <p>
-                        <a class="tweet" href="#" onclick="game.generateTweet()">
-                            <i class="fa fa-twitter" aria-hidden="true"></i> Compartir
-                        </a>
-                    </p>
+  <script src="../js/coloron.js?v=20260420a"></script>
+  <script>
+    (function () {
+      const menuModal = document.getElementById("menu-confirm-modal");
+      const menuTriggers = document.querySelectorAll("[data-menu-exit]");
+      const confirmBtn = document.getElementById("confirm-menu-exit");
+      const cancelBtn = document.getElementById("cancel-menu-exit");
+      const progressKeys = [
+        "pacmanResume",
+        "pacmanResumeOk",
+        "pacmanRestart",
+        "pacmanForceRestart",
+        "flappyResumeOk",
+        "flappyRestart",
+        "stickHeroLives",
+        "stickHeroPaused",
+        "stickHeroCheckpointState",
+        "stickHeroRestart",
+        "coloronPaused",
+        "coloronLives",
+        "coloronCheckpointState",
+        "coloronSkipNextCheck",
+        "coloronRestart",
+        "snakeResumeOk",
+        "snakeRestart",
+        "meteorResume",
+        "meteorResumeOk",
+        "meteorRestart",
+        "neonbreakerResume",
+        "neonbreakerResumeOk",
+        "neonbreakerRestart",
+        "lastAnswerCorrect"
+      ];
 
-                    <div>
-                        <a class="play-again" href="#" onclick="game.start()">Jugar de nuevo</a>
-                        <a class="main-menu" href="../index.html">Menu</a>
-                    </div>
+      if (!menuModal || !menuTriggers.length || !confirmBtn || !cancelBtn) return;
 
-                </div>
+      const clearStoredProgress = () => {
+        progressKeys.forEach((key) => localStorage.removeItem(key));
 
-            </div>
+        window.dispatchEvent(new Event("arcade:menu-exit"));
 
-            <div id="question-modal" class="modal-overlay" aria-hidden="true">
-                <div class="modal">
-                    <h2>Debes responder unas preguntas.</h2>
-                    <p>Responde 4 preguntas de matematica basica para continuar.</p>
-                    <a class="modal-btn" href="questions.html?source=coloron">Responder</a>
-                </div>
-            </div>
+        if (window.PACMAN && typeof window.PACMAN.shutdown === "function") {
+          window.PACMAN.shutdown();
+        }
 
-            <div class="small-glows"></div>
+        if (window.game && typeof window.game.stop === "function") {
+          window.game.stop(false);
+        }
 
-            <div class="glow"><div class="sun"></div></div>
+        if (typeof window.resetGame === "function") {
+          window.resetGame(true);
+        }
+      };
 
-            <div class="waves">
-                <div class="top_wave"></div>
-                <div class="wave1"></div>
-                <div class="wave2"></div>
-                <div class="wave3"></div>
-                <div class="wave4"></div>
-            </div>
+      const closeMenuModal = (event) => {
+        if (event) event.preventDefault();
+        menuModal.classList.remove("is-visible");
+        menuModal.setAttribute("aria-hidden", "true");
+      };
 
-            <div class="mounts">
-                <div class="mount1"></div>
-                <div class="mount2"></div>
-            </div>
+      const openMenuModal = (event) => {
+        event.preventDefault();
+        menuModal.classList.add("is-visible");
+        menuModal.setAttribute("aria-hidden", "false");
+      };
 
-            <div class="clouds"></div>
+      menuTriggers.forEach((trigger) => trigger.addEventListener("click", openMenuModal));
+      confirmBtn.addEventListener("click", clearStoredProgress);
+      cancelBtn.addEventListener("click", closeMenuModal);
+      menuModal.addEventListener("click", (event) => {
+        if (event.target === menuModal) closeMenuModal();
+      });
 
-            <div class="scene">
-                <div class="learn-to-play">Toca las barras para cambiar el color</div>
-                <div class="score" id="score"></div>
-                <div class="lives" id="lives">❤️❤️❤️</div>
-                <div id="timer" style="position: fixed; top: 20px; right: 20px; font-size: 24px; color: white; font-weight: bold; z-index: 9999;">5</div>
-                <div class="ball-holder"></div>
-                <div id="sticks"></div>
-                <div class="noise"></div>
-
-            </div>
-        </div>
-<!-- partial -->
-            <div class="resume-overlay" id="resume-overlay">
-                <div class="resume-box">
-                    <div class="resume-text">Continuando en</div>
-                    <div class="resume-countdown" id="resume-countdown">3</div>
-                </div>
-            </div>
-<script src='https://code.jquery.com/jquery-3.1.1.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.0/TweenMax.min.js'></script><script  src="../js/coloron.js?v=20260418b"></script>
-
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && menuModal.classList.contains("is-visible")) {
+          closeMenuModal();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

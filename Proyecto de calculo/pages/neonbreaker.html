@@ -10,7 +10,7 @@
 </head>
 
 <body>
-  <button id="btn-menu" onclick="window.location.href='../index.html'">
+  <button id="btn-menu" data-menu-exit>
     Regresar al menú
   </button>
 
@@ -34,6 +34,15 @@
     </div>
   </div>
 
+  <div id="menu-confirm-modal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <h2>¿Volver al menú?</h2>
+      <p>Si sales ahora, perderás los puntos actuales.</p>
+      <a class="modal-btn" href="../index.html" id="confirm-menu-exit">Sí, volver al menú</a>
+      <a class="modal-btn" href="#" id="cancel-menu-exit">Cancelar</a>
+    </div>
+  </div>
+
   <canvas id="game-canvas"></canvas>
 
   <div id="hud">
@@ -42,5 +51,84 @@
   </div>
 
   <script src="../js/neonbreaker.js?v=20260418d"></script>
+  <script>
+    (function () {
+      const menuModal = document.getElementById("menu-confirm-modal");
+      const menuTriggers = document.querySelectorAll("[data-menu-exit]");
+      const confirmBtn = document.getElementById("confirm-menu-exit");
+      const cancelBtn = document.getElementById("cancel-menu-exit");
+      const progressKeys = [
+        "pacmanResume",
+        "pacmanResumeOk",
+        "pacmanRestart",
+        "pacmanForceRestart",
+        "flappyResumeOk",
+        "flappyRestart",
+        "stickHeroLives",
+        "stickHeroPaused",
+        "stickHeroCheckpointState",
+        "stickHeroRestart",
+        "coloronPaused",
+        "coloronLives",
+        "coloronCheckpointState",
+        "coloronSkipNextCheck",
+        "coloronRestart",
+        "snakeResumeOk",
+        "snakeRestart",
+        "meteorResume",
+        "meteorResumeOk",
+        "meteorRestart",
+        "neonbreakerResume",
+        "neonbreakerResumeOk",
+        "neonbreakerRestart",
+        "lastAnswerCorrect",
+      ];
+
+      if (!menuModal || !menuTriggers.length || !confirmBtn || !cancelBtn) return;
+
+      const clearStoredProgress = () => {
+        progressKeys.forEach((key) => localStorage.removeItem(key));
+
+        window.dispatchEvent(new Event("arcade:menu-exit"));
+
+        if (window.PACMAN && typeof window.PACMAN.shutdown === "function") {
+          window.PACMAN.shutdown();
+        }
+
+        if (window.game && typeof window.game.stop === "function") {
+          window.game.stop(false);
+        }
+
+        if (typeof window.resetGame === "function") {
+          window.resetGame(true);
+        }
+      };
+
+      const closeMenuModal = (event) => {
+        if (event) event.preventDefault();
+        menuModal.classList.remove("is-visible");
+        menuModal.setAttribute("aria-hidden", "true");
+      };
+
+      const openMenuModal = (event) => {
+        event.preventDefault();
+        menuModal.classList.add("is-visible");
+        menuModal.setAttribute("aria-hidden", "false");
+      };
+
+      menuTriggers.forEach((trigger) => trigger.addEventListener("click", openMenuModal));
+      confirmBtn.addEventListener("click", clearStoredProgress);
+      cancelBtn.addEventListener("click", closeMenuModal);
+      menuModal.addEventListener("click", (event) => {
+        if (event.target === menuModal) closeMenuModal();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && menuModal.classList.contains("is-visible")) {
+          closeMenuModal();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

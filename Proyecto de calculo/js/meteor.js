@@ -242,6 +242,51 @@ let running    = false;
 let gameStarted = false;
 let frameId    = null;
 let frameCount = 0;
+let exitingToMenu = false;
+let startCountdownActive = false;
+let startCountdownTimer = null;
+
+window.addEventListener('arcade:menu-exit', () => {
+  exitingToMenu = true;
+  running = false;
+  gameStarted = false;
+  if (startCountdownTimer) {
+    clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+  }
+  startCountdownActive = false;
+  cancelAnimationFrame(frameId);
+});
+
+function runStartCountdown(onDone) {
+  if (!startOverlay || startCountdownActive) return;
+
+  const icon = startOverlay.querySelector('.start-message i');
+  const message = startOverlay.querySelector('.start-message p');
+  const baseText = 'Toca o haz clic para iniciar';
+  let count = 3;
+
+  startCountdownActive = true;
+  if (icon) icon.style.display = 'none';
+  if (message) message.textContent = `Inicia en ${count}`;
+
+  startCountdownTimer = setInterval(() => {
+    count -= 1;
+    if (count > 0) {
+      if (message) message.textContent = `Inicia en ${count}`;
+      return;
+    }
+
+    clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+    startCountdownActive = false;
+
+    if (icon) icon.style.display = '';
+    if (message) message.textContent = baseText;
+
+    onDone();
+  }, 1000);
+}
 
 function startGame() {
   resize();
@@ -282,7 +327,7 @@ function resumeGame(state) {
 
 // ── Main Loop ─────────────────────────────────────────────
 function loop() {
-  if (!running) return;
+  if (!running || exitingToMenu) return;
   frameId = requestAnimationFrame(loop);
   frameCount++;
 
@@ -364,6 +409,8 @@ function explode() {
 }
 
 function explodeLoop() {
+  if (exitingToMenu) return;
+
   ctx.fillStyle = '#000010';
   ctx.fillRect(0, 0, W, H);
   drawStars();
@@ -415,10 +462,15 @@ function showQuestionModal() {
 const startOverlay = document.getElementById('start-overlay');
 
 function beginGame() {
-  if (gameStarted) return;
-  gameStarted = true;
-  startOverlay.classList.remove('is-visible');
-  startGame();
+  exitingToMenu = false;
+  if (gameStarted || startCountdownActive) return;
+
+  runStartCountdown(() => {
+    if (gameStarted || exitingToMenu) return;
+    gameStarted = true;
+    startOverlay.classList.remove('is-visible');
+    startGame();
+  });
 }
 
 startOverlay.addEventListener('click', beginGame);
@@ -436,7 +488,9 @@ localStorage.removeItem('meteorRestart');
 
 if (restart) {
   localStorage.removeItem('meteorResume');
-  beginGame();
+  gameStarted = true;
+  startOverlay.classList.remove('is-visible');
+  startGame();
 } else if (resumeOk) {
   const resumeRaw = localStorage.getItem('meteorResume');
   if (resumeRaw) {
@@ -453,6 +507,7 @@ if (restart) {
 // Initial draw while waiting
 initShip();
 (function idleDraw() {
+  if (exitingToMenu) return;
   ctx.fillStyle = '#000010';
   ctx.fillRect(0, 0, W, H);
   drawStars();

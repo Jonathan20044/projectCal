@@ -62,6 +62,56 @@ let gameOverPending    = false;
 let ball2LaunchTimer   = 0;    // frames until 2nd ball launches
 let ball2LaunchFrames  = 150;  // ~2.5 seconds at 60fps
 let ball2Launched      = false;
+let exitingToMenu      = false;
+let flashIntervalId    = null;
+let startCountdownActive = false;
+let startCountdownTimer = null;
+
+window.addEventListener('arcade:menu-exit', () => {
+  exitingToMenu = true;
+  running = false;
+  gameStarted = false;
+  if (startCountdownTimer) {
+    clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+  }
+  startCountdownActive = false;
+  cancelAnimationFrame(frameId);
+  if (flashIntervalId) {
+    clearInterval(flashIntervalId);
+    flashIntervalId = null;
+  }
+});
+
+function runStartCountdown(onDone) {
+  if (!startOverlay || startCountdownActive) return;
+
+  const icon = startOverlay.querySelector('.start-message i');
+  const message = startOverlay.querySelector('.start-message p');
+  const baseText = 'Toca o haz clic para iniciar';
+  let count = 3;
+
+  startCountdownActive = true;
+  if (icon) icon.style.display = 'none';
+  if (message) message.textContent = `Inicia en ${count}`;
+
+  startCountdownTimer = setInterval(() => {
+    count -= 1;
+    if (count > 0) {
+      if (message) message.textContent = `Inicia en ${count}`;
+      return;
+    }
+
+    clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+    startCountdownActive = false;
+
+    if (icon) icon.style.display = '';
+    if (message) message.textContent = baseText;
+
+    onDone();
+  }, 1000);
+}
 
 const scoreEl = document.getElementById('score');
 const levelEl = document.getElementById('level');
@@ -386,7 +436,7 @@ function updateGame() {
 
 // ── Main Loop ──────────────────────────────────────────
 function loop() {
-  if (!running) return;
+  if (!running || exitingToMenu) return;
   frameId = requestAnimationFrame(loop);
 
   drawBg();
@@ -457,14 +507,20 @@ function resumeGame(state) {
 }
 
 function endGame() {
+  if (exitingToMenu) return;
+
   running = false;
   cancelAnimationFrame(frameId);
   saveResumeState();
   let f = 0;
-  const flashId = setInterval(() => {
+  flashIntervalId = setInterval(() => {
     ctx.fillStyle = `rgba(255, 20, 60, 0.2)`;
     ctx.fillRect(0, 0, W, H);
-    if (++f >= 6) { clearInterval(flashId); showQuestionModal(); }
+    if (++f >= 6) {
+      clearInterval(flashIntervalId);
+      flashIntervalId = null;
+      showQuestionModal();
+    }
   }, 80);
 }
 
@@ -478,12 +534,17 @@ function showQuestionModal() {
 const startOverlay = document.getElementById('start-overlay');
 
 function beginGame() {
-  if (gameStarted) return;
-  gameStarted = true;
-  startOverlay.classList.remove('is-visible');
-  initGame(1);
-  running = true;
-  loop();
+  exitingToMenu = false;
+  if (gameStarted || startCountdownActive) return;
+
+  runStartCountdown(() => {
+    if (gameStarted || exitingToMenu) return;
+    gameStarted = true;
+    startOverlay.classList.remove('is-visible');
+    initGame(1);
+    running = true;
+    loop();
+  });
 }
 
 startOverlay.addEventListener('click', beginGame);
@@ -500,7 +561,11 @@ localStorage.removeItem('neonbreakerRestart');
 
 if (restart) {
   localStorage.removeItem('neonbreakerResume');
-  beginGame();
+  gameStarted = true;
+  startOverlay.classList.remove('is-visible');
+  initGame(1);
+  running = true;
+  loop();
 } else if (resumeOk) {
   const resumeRaw = localStorage.getItem('neonbreakerResume');
   if (resumeRaw) {
@@ -515,7 +580,7 @@ if (restart) {
 }
 
 function idle() {
-  if (running) return;
+  if (running || exitingToMenu) return;
   requestAnimationFrame(idle);
   drawBg();
   drawBricks();

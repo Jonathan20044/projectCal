@@ -64,6 +64,9 @@ const perfectElement = document.getElementById("perfect");
 const restartButton = document.getElementById("restart");
 const scoreElement = document.getElementById("score");
 const startOverlay = document.getElementById("start-overlay");
+let startUnlocked = !startOverlay || !startOverlay.classList.contains("is-visible");
+let startCountdownActive = false;
+let startCountdownTimer = null;
 
 // Initialize layout
 initializeGame();
@@ -132,6 +135,61 @@ function hideStartOverlay() {
   startOverlay.setAttribute("aria-hidden", "true");
 }
 
+function runStartCountdown() {
+  if (!startOverlay || startCountdownActive || startUnlocked) {
+    return;
+  }
+
+  const icon = startOverlay.querySelector(".start-message i");
+  const message = startOverlay.querySelector(".start-message p");
+  const baseText = "Toca o haz clic para iniciar";
+  let count = 3;
+
+  startCountdownActive = true;
+
+  if (icon) {
+    icon.style.display = "none";
+  }
+  if (message) {
+    message.textContent = "Inicia en " + count;
+  }
+
+  startCountdownTimer = window.setInterval(function () {
+    count -= 1;
+
+    if (count > 0) {
+      if (message) {
+        message.textContent = "Inicia en " + count;
+      }
+      return;
+    }
+
+    window.clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+    startCountdownActive = false;
+    startUnlocked = true;
+
+    if (icon) {
+      icon.style.display = "";
+    }
+    if (message) {
+      message.textContent = baseText;
+    }
+
+    hideStartOverlay();
+  }, 1000);
+}
+
+function ensureStartUnlocked() {
+  if (startUnlocked || !startOverlay || !startOverlay.classList.contains("is-visible")) {
+    startUnlocked = true;
+    return true;
+  }
+
+  runStartCountdown();
+  return false;
+}
+
 function generateTree() {
   const minimumGap = 30;
   const maximumGap = 150;
@@ -174,6 +232,11 @@ function generatePlatform() {
 // If space was pressed restart the game
 window.addEventListener("keydown", function (event) {
   if (event.key == " ") {
+    if (!ensureStartUnlocked()) {
+      event.preventDefault();
+      return;
+    }
+
     event.preventDefault();
     hideStartOverlay();
     resetGame(true);
@@ -182,6 +245,10 @@ window.addEventListener("keydown", function (event) {
 });
 
 window.addEventListener("mousedown", function (event) {
+  if (!ensureStartUnlocked()) {
+    return;
+  }
+
   if (phase == "waiting") {
     hideStartOverlay();
     saveCheckpointState();
@@ -193,6 +260,10 @@ window.addEventListener("mousedown", function (event) {
 });
 
 window.addEventListener("touchstart", function (event) {
+  if (!ensureStartUnlocked()) {
+    return;
+  }
+
   if (phase == "waiting") {
     hideStartOverlay();
     saveCheckpointState();
@@ -663,3 +734,23 @@ function updateLivesDisplay() {
 }
 
 updateLivesDisplay();
+
+window.addEventListener("arcade:menu-exit", function () {
+  phase = "waiting";
+  lastTimestamp = undefined;
+  restartButton.style.display = "none";
+  if (startCountdownTimer !== null) {
+    window.clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+  }
+  startCountdownActive = false;
+  startUnlocked = false;
+  localStorage.removeItem("stickHeroPaused");
+  localStorage.removeItem("stickHeroCheckpointState");
+
+  const questionModal = document.getElementById("question-modal");
+  if (questionModal) {
+    questionModal.classList.remove("is-visible");
+    questionModal.setAttribute("aria-hidden", "true");
+  }
+});

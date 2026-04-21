@@ -877,7 +877,11 @@ var PACMAN = (function () {
     map = null,
     user = null,
     stored = null,
-    questionActive = false;
+    questionActive = false,
+    safeUntilTick = 0,
+    startTapHandler = null,
+    startTapWrapper = null,
+    startTapOverlay = null;
 
   function getTick() {
     return tick;
@@ -1145,6 +1149,9 @@ var PACMAN = (function () {
           setState(EATEN_PAUSE);
           timerStart = tick;
         } else if (ghosts[i].isDangerous()) {
+          if (tick < safeUntilTick) {
+            continue;
+          }
           audio.play("die");
           setState(DYING);
           timerStart = tick;
@@ -1182,10 +1189,11 @@ var PACMAN = (function () {
         user.drawDead(ctx, (tick - timerStart) / (Pacman.FPS * 2));
       }
     } else if (state === COUNTDOWN) {
-      diff = 5 + Math.floor((timerStart - tick) / Pacman.FPS);
+      diff = 3 + Math.floor((timerStart - tick) / Pacman.FPS);
 
       if (diff === 0) {
         map.draw(ctx);
+        safeUntilTick = tick + Pacman.FPS * 2;
         setState(PLAYING);
       } else {
         if (diff !== lastTime) {
@@ -1311,6 +1319,9 @@ var PACMAN = (function () {
   }
 
   function loaded() {
+    // Avoid duplicate listeners/loops when init runs more than once.
+    document.removeEventListener("keydown", keyDown, true);
+    document.removeEventListener("keypress", keyPress, true);
     document.addEventListener("keydown", keyDown, true);
     document.addEventListener("keypress", keyPress, true);
 
@@ -1318,22 +1329,39 @@ var PACMAN = (function () {
     var wrapper = document.getElementById("pacman");
     var startOverlay = document.getElementById("start-overlay");
 
-    function handleStartTap(e) {
+    if (startTapWrapper && startTapHandler) {
+      startTapWrapper.removeEventListener("click", startTapHandler, false);
+      startTapWrapper.removeEventListener("touchend", startTapHandler, false);
+    }
+
+    if (startTapOverlay && startTapHandler) {
+      startTapOverlay.removeEventListener("click", startTapHandler, false);
+      startTapOverlay.removeEventListener("touchstart", startTapHandler, false);
+    }
+
+    startTapHandler = function handleStartTap(e) {
       if (state === WAITING) {
         e.preventDefault();
         hideStartOverlay();
         startNewGame();
       }
-    }
+    };
 
-    wrapper.addEventListener("click", handleStartTap, false);
-    wrapper.addEventListener("touchend", handleStartTap, false);
+    startTapWrapper = wrapper;
+    startTapOverlay = startOverlay;
+
+    wrapper.addEventListener("click", startTapHandler, false);
+    wrapper.addEventListener("touchend", startTapHandler, false);
 
     if (startOverlay) {
-      startOverlay.addEventListener("click", handleStartTap, false);
-      startOverlay.addEventListener("touchstart", handleStartTap, {
+      startOverlay.addEventListener("click", startTapHandler, false);
+      startOverlay.addEventListener("touchstart", startTapHandler, {
         passive: false,
       });
+    }
+
+    if (timer) {
+      window.clearInterval(timer);
     }
 
     timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
@@ -1367,10 +1395,38 @@ var PACMAN = (function () {
     }
   }
 
+  function shutdown() {
+    questionActive = false;
+    setState(WAITING);
+
+    if (timer) {
+      window.clearInterval(timer);
+      timer = null;
+    }
+
+    document.removeEventListener("keydown", keyDown, true);
+    document.removeEventListener("keypress", keyPress, true);
+
+    if (startTapWrapper && startTapHandler) {
+      startTapWrapper.removeEventListener("click", startTapHandler, false);
+      startTapWrapper.removeEventListener("touchend", startTapHandler, false);
+    }
+
+    if (startTapOverlay && startTapHandler) {
+      startTapOverlay.removeEventListener("click", startTapHandler, false);
+      startTapOverlay.removeEventListener("touchstart", startTapHandler, false);
+    }
+
+    if (audio) {
+      audio.pause();
+    }
+  }
+
   return {
     init: init,
     answerCorrect: answerCorrect,
     answerWrong: answerWrong,
+    shutdown: shutdown,
   };
 })();
 

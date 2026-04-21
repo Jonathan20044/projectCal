@@ -225,6 +225,10 @@ var velocity = 0;
 var start = false;
 var gameOver = false;
 var score = 0;
+var exitingToMenu = false;
+var updateFrameId = null;
+var startCountdownActive = false;
+var startCountdownTimer = null;
 
 var bonePtr = 0;
 var boneStart = 400;
@@ -243,16 +247,71 @@ function getRandomHeight(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
+function runStartCountdown(onDone) {
+  var overlay = document.getElementById("start-overlay");
+  if (!overlay || startCountdownActive) {
+    return;
+  }
+
+  var icon = overlay.querySelector(".start-message i");
+  var message = overlay.querySelector(".start-message p");
+  var baseText = "Toca o haz clic para iniciar";
+  var count = 3;
+
+  startCountdownActive = true;
+
+  if (icon) {
+    icon.style.display = "none";
+  }
+  if (message) {
+    message.textContent = "Inicia en " + count;
+  }
+
+  startCountdownTimer = window.setInterval(function () {
+    count -= 1;
+
+    if (count > 0) {
+      if (message) {
+        message.textContent = "Inicia en " + count;
+      }
+      return;
+    }
+
+    window.clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+    startCountdownActive = false;
+
+    if (icon) {
+      icon.style.display = "";
+    }
+    if (message) {
+      message.textContent = baseText;
+    }
+
+    onDone();
+  }, 1000);
+}
+
 function playerInput() {
   if (!start) {
-    start = true;
-    velocity = lift;
-    dinoAngle = -20;
-    var ctrl = document.getElementById("ctrl-ctn");
-    if (ctrl) {
-      ctrl.style.opacity = 0;
+    if (startCountdownActive) {
+      return;
     }
-    hideStartOverlay();
+
+    runStartCountdown(function () {
+      if (exitingToMenu || start) {
+        return;
+      }
+
+      start = true;
+      velocity = lift;
+      dinoAngle = -20;
+      var ctrl = document.getElementById("ctrl-ctn");
+      if (ctrl) {
+        ctrl.style.opacity = 0;
+      }
+      hideStartOverlay();
+    });
   } else {
     if (!gameOver) {
       velocity = lift;
@@ -347,6 +406,10 @@ function hideStartOverlay() {
 }
 
 function update() {
+  if (exitingToMenu) {
+    return;
+  }
+
   // foreground scroll
   if (!gameOver) {
     fgPos_X += scrollSpeed;
@@ -473,7 +536,9 @@ function render() {
     ctx.drawImage(fg, rightmost, canvas.height - 150);
   }
 
-  window.requestAnimationFrame(update);
+  if (!exitingToMenu) {
+    updateFrameId = window.requestAnimationFrame(update);
+  }
 }
 
 document.addEventListener("keydown", function (e) {
@@ -497,5 +562,20 @@ if (localStorage.getItem("flappyRestart") === "true") {
   localStorage.removeItem("flappyRestart");
   replay();
 }
+
+window.addEventListener("arcade:menu-exit", function () {
+  exitingToMenu = true;
+  start = false;
+  gameOver = true;
+  if (startCountdownTimer !== null) {
+    window.clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+  }
+  startCountdownActive = false;
+  if (updateFrameId !== null) {
+    window.cancelAnimationFrame(updateFrameId);
+    updateFrameId = null;
+  }
+});
 
 update();

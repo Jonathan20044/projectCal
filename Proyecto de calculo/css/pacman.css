@@ -162,6 +162,57 @@ a {
   box-shadow: 0 5px 10px rgba(0,0,0,0.4), 0 0 15px #FFD700;
 }
 
+#menu-confirm-modal .modal-btn {
+  display: flex;
+  width: 210px;
+  min-height: 36px;
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  margin: 0 auto;
+}
+
+#menu-confirm-modal .modal-btn + .modal-btn {
+  margin-top: 12px;
+}
+
+#menu-confirm-modal {
+  z-index: 5000;
+}
+
+#menu-confirm-modal .modal {
+  width: min(92vw, 420px);
+}
+
+@media (max-width: 480px) {
+  #menu-confirm-modal {
+    padding: 1rem;
+  }
+
+  #menu-confirm-modal .modal {
+    max-width: 340px;
+    padding: 1.5rem 1rem 1.1rem;
+    border-radius: 18px;
+  }
+
+  #menu-confirm-modal .modal h2 {
+    font-size: clamp(1.5rem, 8vw, 2rem);
+    line-height: 1.15;
+  }
+
+  #menu-confirm-modal .modal p {
+    font-size: 0.92rem;
+    line-height: 1.45;
+    margin-bottom: 1.1rem;
+  }
+
+  #menu-confirm-modal .modal-btn {
+    width: 190px;
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}
+
 #start-overlay {
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(8px);

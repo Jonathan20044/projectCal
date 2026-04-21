@@ -218,12 +218,55 @@ function showQuestionModal() {
 // ── Start Initiation ───────────────────────
 const startOverlay = document.getElementById('start-overlay');
 let gameStarted = false;
+let startCountdownActive = false;
+let startCountdownTimer = null;
 
-function beginGame() {
-  if (gameStarted) return;
-  gameStarted = true;
-  startOverlay.classList.remove('is-visible');
-  initGame();
+function runStartCountdown(onDone) {
+  if (!startOverlay || startCountdownActive) return;
+
+  const icon = startOverlay.querySelector('.start-message i');
+  const message = startOverlay.querySelector('.start-message p');
+  const baseText = 'Toca o haz clic para iniciar';
+  let count = 3;
+
+  startCountdownActive = true;
+  if (icon) icon.style.display = 'none';
+  if (message) message.textContent = `Inicia en ${count}`;
+
+  startCountdownTimer = setInterval(() => {
+    count -= 1;
+    if (count > 0) {
+      if (message) message.textContent = `Inicia en ${count}`;
+      return;
+    }
+
+    clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+    startCountdownActive = false;
+
+    if (icon) icon.style.display = '';
+    if (message) message.textContent = baseText;
+
+    onDone();
+  }, 1000);
+}
+
+function beginGame(skipCountdown = false) {
+  if (gameStarted || startCountdownActive) return;
+
+  const startNow = () => {
+    if (gameStarted) return;
+    gameStarted = true;
+    startOverlay.classList.remove('is-visible');
+    initGame();
+  };
+
+  if (skipCountdown) {
+    startNow();
+    return;
+  }
+
+  runStartCountdown(startNow);
 }
 
 startOverlay.addEventListener('click', beginGame);
@@ -235,7 +278,7 @@ startOverlay.addEventListener('touchstart', (e) => {
 // Resume from questions
 if (localStorage.getItem('snakeRestart') === 'true') {
   localStorage.removeItem('snakeRestart');
-  beginGame();
+  beginGame(true);
 }
 
 // Initial state for display
