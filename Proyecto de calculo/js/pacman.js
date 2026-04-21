@@ -881,7 +881,44 @@ var PACMAN = (function () {
     safeUntilTick = 0,
     startTapHandler = null,
     startTapWrapper = null,
-    startTapOverlay = null;
+    startTapOverlay = null,
+    startCountdownActive = false,
+    startCountdownTimer = null;
+
+  function runStartCountdown(onDone) {
+    var overlay = document.getElementById("start-overlay");
+    if (!overlay || startCountdownActive) return;
+    
+    var icon = overlay.querySelector(".start-message i");
+    var message = overlay.querySelector(".start-message p");
+    var baseText = "Toca o haz clic para iniciar";
+    var count = 3;
+    
+    startCountdownActive = true;
+    
+    if (overlay) overlay.classList.add("is-visible");
+    if (icon) icon.style.display = "none";
+    if (message) message.textContent = "Inicia en " + count;
+    
+    startCountdownTimer = window.setInterval(function () {
+      count -= 1;
+      
+      if (count > 0) {
+        if (message) message.textContent = "Inicia en " + count;
+        return;
+      }
+      
+      window.clearInterval(startCountdownTimer);
+      startCountdownTimer = null;
+      startCountdownActive = false;
+      
+      if (icon) icon.style.display = "";
+      if (message) message.textContent = baseText;
+      if (overlay) overlay.classList.remove("is-visible");
+      
+      onDone();
+    }, 1000);
+  }
 
   function getTick() {
     return tick;
@@ -982,12 +1019,14 @@ var PACMAN = (function () {
       ghosts[i].reset();
     }
     audio.play("start");
-    timerStart = tick;
-    setState(COUNTDOWN);
+    runStartCountdown(function() {
+      timerStart = tick;
+      safeUntilTick = tick + Pacman.FPS * 2;
+      setState(PLAYING);
+    });
   }
 
   function startNewGame() {
-    hideStartOverlay();
     setState(WAITING);
     level = 1;
     user.reset();
@@ -1035,10 +1074,13 @@ var PACMAN = (function () {
 
   window.addEventListener("arcade:menu-close", function () {
     if (state !== PAUSE) return;
-    audio.resume();
     map.draw(ctx);
-    timerStart = tick;
-    setState(COUNTDOWN);
+    runStartCountdown(function() {
+      audio.resume();
+      timerStart = tick;
+      safeUntilTick = tick + Pacman.FPS * 2;
+      setState(PLAYING);
+    });
   });
 
   function loseLife() {
@@ -1330,9 +1372,8 @@ var PACMAN = (function () {
     }
 
     startTapHandler = function handleStartTap(e) {
-      if (state === WAITING) {
+      if (state === WAITING && !startCountdownActive) {
         e.preventDefault();
-        hideStartOverlay();
         startNewGame();
       }
     };
@@ -1377,7 +1418,6 @@ var PACMAN = (function () {
       user.setScore(resumeData.score || 0);
       map.reset();
       map.draw(ctx);
-      hideStartOverlay();
       startLevel();
       return;
     }
@@ -1386,6 +1426,12 @@ var PACMAN = (function () {
   function shutdown() {
     questionActive = false;
     setState(WAITING);
+
+    if (startCountdownTimer !== null) {
+      window.clearInterval(startCountdownTimer);
+      startCountdownTimer = null;
+    }
+    startCountdownActive = false;
 
     if (timer) {
       window.clearInterval(timer);
