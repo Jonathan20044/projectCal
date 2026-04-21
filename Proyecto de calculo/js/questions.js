@@ -140,6 +140,48 @@
       procedure:
         "El valor propio es $$\\lambda = 2$$. Al resolver $$(A − 2I)v = 0$$ solo aparece un vector propio independiente. Para diagonalizar una matriz 2×2 se necesitan dos vectores propios independientes. Por eso <b>No es diagonalizable</b>.",
     },
+    //----------------------NUEVAS-----------------------//
+    {
+      id: "q10",
+      text: "Pregunta — Matriz singular (Caso límite)",
+      latex: "A = \\begin{pmatrix} 3 & 6 \\\\ 1 & 2 \\end{pmatrix}\\\\\\text{¿Cuáles son los valores propios?}",
+      options: ["0 y 5", "1 y 6", "0 y 3", "2 y 3"],
+      correct: "0 y 5",
+      latexOptions: false,
+      procedure: "Restamos $$\\lambda$$ en la diagonal: $$A − \\lambda I = \\begin{pmatrix} 3-\\lambda & 6 \\\\ 1 & 2-\\lambda \\end{pmatrix}$$.<br>Calculamos el determinante: $$det(A − \\lambda I) = (3−\\lambda)(2−\\lambda) − 6 = 0$$.<br>Simplificamos: $$6 − 3\\lambda − 2\\lambda + \\lambda^2 − 6 = 0$$, que se reduce a $$\\lambda^2 − 5\\lambda = 0$$.<br>Factorizando obtenemos $$\\lambda(\\lambda − 5) = 0$$. Por lo tanto, <b>0 y 5</b> son los valores propios."
+    },
+    {
+      id: "q11",
+      text: "Pregunta — Propiedades de valores propios",
+      latex: "\\text{Si A tiene valor propio } \\lambda = 3 \\text{ asociado a } v,\\\\\\text{¿cuál es un valor propio de } A^2\\text{?}",
+      options: ["3", "6", "9", "27"],
+      correct: "9",
+      latexOptions: false,
+      procedure: "Sabemos por definición que $$Av = 3v$$.<br>Si aplicamos la matriz A nuevamente a ambos lados: $$A(Av) = A(3v)$$, lo que es igual a $$A^2v = 3(Av)$$.<br>Sustituimos el $$Av$$ de la derecha por $$3v$$ y obtenemos: $$A^2v = 3(3v) = 9v$$.<br>Por definición, <b>9</b> es el valor propio asociado a $$A^2$$."
+    },
+    {
+      id: "q12",
+      text: "Pregunta — Matriz 3x3 por bloques",
+      latex: "A = \\begin{pmatrix} 2 & 1 & 0 \\\\ 1 & 2 & 0 \\\\ 0 & 0 & 4 \\end{pmatrix}\\\\\\text{¿Cuáles son los valores propios?}",
+      options: ["2, 2, 4", "1, 3, 4", "0, 1, 4", "1, 2, 4"],
+      correct: "1, 3, 4",
+      latexOptions: false,
+      procedure: "$$A − \\lambda I = \\begin{pmatrix} 2-\\lambda & 1 & 0 \\\\ 1 & 2-\\lambda & 0 \\\\ 0 & 0 & 4-\\lambda \\end{pmatrix}$$<br>Desarrollando el determinante por la tercera fila: $$det = (4−\\lambda)[(2−\\lambda)(2-\\lambda) − 1] = 0$$.<br>Simplificamos el corchete: $$(4−\\lambda)(\\lambda^2 − 4\\lambda + 3) = 0$$.<br>Factorizamos: $$(4−\\lambda)(\\lambda − 3)(\\lambda − 1) = 0$$.<br>Los valores propios son <b>1, 3 y 4</b>."
+    },
+    {
+      id: "q13",
+      text: "Pregunta — Matriz de paso P",
+      latex: "A = \\begin{pmatrix} 4 & 1 \\\\ 2 & 3 \\end{pmatrix} \\text{ con } \\lambda_1=5, \\lambda_2=2\\\\\\text{¿Cuál es una matriz de paso P válida?}",
+      options: [
+        "\\begin{pmatrix} 1 & -1 \\\\ 1 & 2 \\end{pmatrix}",
+        "\\begin{pmatrix} 5 & 0 \\\\ 0 & 2 \\end{pmatrix}",
+        "\\begin{pmatrix} 1 & 1 \\\\ -1 & 2 \\end{pmatrix}",
+        "\\begin{pmatrix} -1 & 1 \\\\ 2 & 1 \\end{pmatrix}"
+      ],
+      correct: "\\begin{pmatrix} 1 & -1 \\\\ 1 & 2 \\end{pmatrix}",
+      latexOptions: true,
+      procedure: "<b>Paso 1. Buscar vector propio para $$\\lambda = 5$$</b><br>$$A - 5I = \\begin{pmatrix} -1 & 1 \\\\ 2 & -2 \\end{pmatrix}$$<br>Extraemos la ecuación de la primera fila: $$-x + y = 0 \\rightarrow y = x$$.<br>Si asignamos $$x = 1$$, entonces $$y = 1$$. Nuestro vector es $$v_1 = (1, 1)$$.<br><br><b>Paso 2. Buscar vector propio para $$\\lambda = 2$$</b><br>$$A - 2I = \\begin{pmatrix} 2 & 1 \\\\ 2 & 1 \\end{pmatrix}$$<br>Extraemos la ecuación: $$2x + y = 0 \\rightarrow y = -2x$$.<br>Si asignamos $$x = -1$$, entonces $$y = 2$$. Nuestro vector es $$v_2 = (-1, 2)$$.<br><br><b>Paso 3. Construir la matriz P</b><br>La matriz se ensambla colocando los vectores propios como columnas:<br>$$P = \\begin{pmatrix} 1 & -1 \\\\ 1 & 2 \\end{pmatrix}$$"
+    }
   ];
 
   // Randomize exactly ONE question from the bank
