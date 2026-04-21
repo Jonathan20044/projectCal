@@ -260,6 +260,8 @@ function runStartCountdown(onDone) {
 
   startCountdownActive = true;
 
+  if (overlay) overlay.classList.add("is-visible");
+
   if (icon) {
     icon.style.display = "none";
   }
@@ -287,6 +289,9 @@ function runStartCountdown(onDone) {
     if (message) {
       message.textContent = baseText;
     }
+
+    if (typeof overlay !== "undefined" && overlay) overlay.classList.remove("is-visible");
+    if (typeof startOverlay !== "undefined" && startOverlay) startOverlay.classList.remove("is-visible");
 
     onDone();
   }, 1000);
@@ -554,14 +559,17 @@ document.addEventListener("touchstart", function (e) {
   playerInput();
 });
 
+document.addEventListener("mousedown", function (e) {
+  if (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A") return;
+  e.preventDefault();
+  playerInput();
+});
+
 document.getElementById("replay").addEventListener("click", function () {
   replay();
 });
 
-if (localStorage.getItem("flappyRestart") === "true") {
-  localStorage.removeItem("flappyRestart");
-  replay();
-}
+if (localStorage.getItem("flappyRestart") === "true") { localStorage.removeItem("flappyRestart"); }
 
 window.addEventListener("arcade:menu-exit", function () {
   exitingToMenu = true;
@@ -578,4 +586,27 @@ window.addEventListener("arcade:menu-exit", function () {
   }
 });
 
+let isMenuPaused = false;
+
+window.addEventListener("arcade:menu-open", function () {
+  if (gameOver || startCountdownActive || !start) return;
+  isMenuPaused = true;
+  if (updateFrameId !== null) {
+    window.cancelAnimationFrame(updateFrameId);
+    updateFrameId = null;
+  }
+});
+
+window.addEventListener("arcade:menu-close", function () {
+  if (gameOver || !isMenuPaused) return;
+  isMenuPaused = false;
+  runStartCountdown(function() {
+    if (!gameOver && !exitingToMenu) {
+       updateFrameId = window.requestAnimationFrame(update);
+    }
+  });
+});
+
 update();
+
+

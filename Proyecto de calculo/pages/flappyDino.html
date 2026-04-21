@@ -30,9 +30,9 @@
   </div>
   <div id="question-modal" class="modal-overlay" aria-hidden="true">
     <div class="modal">
-      <h2>Debes responder unas preguntas.</h2>
-      <p>Responde 4 preguntas de matematica basica para continuar.</p>
-      <a class="modal-btn" href="questions.html?source=flappy">Responder</a>
+      <h2>¡Caída Fuerte!</h2>
+      <p>Para seguir jugando tienes que responder unas preguntas.</p>
+      <a class="modal-btn danger-btn" href="questions.html?source=flappy">Volar &amp; Reintentar</a>
     </div>
   </div>
 
@@ -105,12 +105,14 @@
         if (event) event.preventDefault();
         menuModal.classList.remove("is-visible");
         menuModal.setAttribute("aria-hidden", "true");
+        window.dispatchEvent(new Event("arcade:menu-close"));
       };
 
       const openMenuModal = (event) => {
         event.preventDefault();
         menuModal.classList.add("is-visible");
         menuModal.setAttribute("aria-hidden", "false");
+        window.dispatchEvent(new Event("arcade:menu-open"));
       };
 
       menuTriggers.forEach((trigger) => trigger.addEventListener("click", openMenuModal));

@@ -258,6 +258,26 @@ window.addEventListener('arcade:menu-exit', () => {
   cancelAnimationFrame(frameId);
 });
 
+let isMenuPaused = false;
+
+window.addEventListener("arcade:menu-open", () => {
+  if (!running || startCountdownActive) return;
+  isMenuPaused = true;
+  running = false;
+  cancelAnimationFrame(frameId);
+  frameId = null;
+});
+
+window.addEventListener("arcade:menu-close", () => {
+  if (!isMenuPaused) return;
+  isMenuPaused = false;
+  runStartCountdown(() => {
+    if (exitingToMenu) return;
+    running = true;
+    frameId = requestAnimationFrame(loop);
+  });
+});
+
 function runStartCountdown(onDone) {
   if (!startOverlay || startCountdownActive) return;
 
@@ -267,6 +287,8 @@ function runStartCountdown(onDone) {
   let count = 3;
 
   startCountdownActive = true;
+
+  if (startOverlay) startOverlay.classList.add("is-visible");
   if (icon) icon.style.display = 'none';
   if (message) message.textContent = `Inicia en ${count}`;
 
@@ -283,6 +305,9 @@ function runStartCountdown(onDone) {
 
     if (icon) icon.style.display = '';
     if (message) message.textContent = baseText;
+
+    if (typeof overlay !== "undefined" && overlay) overlay.classList.remove("is-visible");
+    if (typeof startOverlay !== "undefined" && startOverlay) startOverlay.classList.remove("is-visible");
 
     onDone();
   }, 1000);
@@ -486,12 +511,7 @@ const restart = localStorage.getItem('meteorRestart') === 'true';
 localStorage.removeItem('meteorResumeOk');
 localStorage.removeItem('meteorRestart');
 
-if (restart) {
-  localStorage.removeItem('meteorResume');
-  gameStarted = true;
-  startOverlay.classList.remove('is-visible');
-  startGame();
-} else if (resumeOk) {
+if (restart) { localStorage.removeItem('meteorResume'); } else if (resumeOk) {
   const resumeRaw = localStorage.getItem('meteorResume');
   if (resumeRaw) {
     const state = JSON.parse(resumeRaw);
@@ -514,3 +534,5 @@ initShip();
   drawShip(ship.x, ship.y); 
   if (!running) requestAnimationFrame(idleDraw);
 })();
+
+

@@ -1024,21 +1024,29 @@ var PACMAN = (function () {
     return true;
   }
 
+  window.addEventListener("arcade:menu-open", function () {
+    if (state === WAITING || state === PAUSE || state === COUNTDOWN || state === DYING) return;
+    stored = state;
+    setState(PAUSE);
+    audio.pause();
+    map.draw(ctx);
+    dialog("Pausado");
+  });
+
+  window.addEventListener("arcade:menu-close", function () {
+    if (state !== PAUSE) return;
+    audio.resume();
+    map.draw(ctx);
+    timerStart = tick;
+    setState(COUNTDOWN);
+  });
+
   function loseLife() {
     setState(WAITING);
     user.loseLife();
 
     audio.pause();
     map.draw(ctx);
-    if (user.getLives() <= 0) {
-      dialog("Game Over");
-
-      setTimeout(function () {
-        startNewGame();
-      }, 1500);
-
-      return; //
-    }
 
     dialog("Responde la pregunta");
     setState(PAUSE);
@@ -1083,25 +1091,6 @@ var PACMAN = (function () {
       textBase,
     );
 
-    // Draw Lives (Centered)
-    var lives = user.getLives();
-    var centerX = (map.width * map.blockSize) / 2;
-    var startX = centerX - ((lives - 1) * iconPadding) / 2;
-
-    for (var i = 0; i < lives; i++) {
-      ctx.fillStyle = "#FFFF00";
-      ctx.beginPath();
-      ctx.moveTo(startX + i * iconPadding, topLeft + footerHeight / 2);
-      ctx.arc(
-        startX + i * iconPadding,
-        topLeft + footerHeight / 2,
-        iconSize,
-        Math.PI * 0.25,
-        Math.PI * 1.75,
-        false,
-      );
-      ctx.fill();
-    }
   }
 
   function redrawBlock(pos) {
@@ -1244,11 +1233,12 @@ var PACMAN = (function () {
           Math.min(viewport.width / gameCols, viewport.height / gameRows),
         ),
       ),
-      canvas = document.createElement("canvas");
+    canvas = document.createElement("canvas");
 
     canvas.setAttribute("width", blockSize * gameCols + "px");
     canvas.setAttribute("height", blockSize * gameRows + "px");
 
+    wrapper.innerHTML = "";
     wrapper.appendChild(canvas);
 
     ctx = canvas.getContext("2d");
@@ -1375,8 +1365,6 @@ var PACMAN = (function () {
 
     if (restart) {
       localStorage.removeItem("pacmanResume");
-      hideStartOverlay();
-      startNewGame();
       return;
     }
 
@@ -1789,8 +1777,11 @@ function ensurePacmanInitialized() {
     return;
   }
 
+  if (el.dataset.pacmanInitialized === "true") {
+    return;
+  }
+
   if (!el.querySelector("canvas")) {
-    el.dataset.pacmanInitialized = "false";
     initPacmanPage();
   }
 }

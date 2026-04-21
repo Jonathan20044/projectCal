@@ -29,7 +29,7 @@
         <i class='bx bxs-error'></i>
       </div>
       <h2>¡Pelota Perdida!</h2>
-      <p>Responde una pregunta de matemáticas para volver a jugar.</p>
+      <p>Para seguir jugando tienes que responder unas preguntas.</p>
       <a class="modal-btn danger-btn" href="questions.html?source=neonbreaker">Responder &amp; Reintentar</a>
     </div>
   </div>
@@ -108,12 +108,14 @@
         if (event) event.preventDefault();
         menuModal.classList.remove("is-visible");
         menuModal.setAttribute("aria-hidden", "true");
+        window.dispatchEvent(new Event("arcade:menu-close"));
       };
 
       const openMenuModal = (event) => {
         event.preventDefault();
         menuModal.classList.add("is-visible");
         menuModal.setAttribute("aria-hidden", "false");
+        window.dispatchEvent(new Event("arcade:menu-open"));
       };
 
       menuTriggers.forEach((trigger) => trigger.addEventListener("click", openMenuModal));

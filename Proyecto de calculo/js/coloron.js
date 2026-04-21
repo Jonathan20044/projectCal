@@ -31,6 +31,7 @@ let bonusScore = 0;
 
 let spawnTimer = 0;
 let spawnEveryMs = 1150;
+let currentSpawnDelay = 1150;
 let obstacleBaseSpeed = 0.9;
 let nextObstacleId = 1;
 
@@ -144,6 +145,7 @@ function resetRun() {
 
   spawnTimer = 0;
   spawnEveryMs = 1150;
+  currentSpawnDelay = 1150;
   obstacleBaseSpeed = 0.9;
   nextObstacleId = 1;
 
@@ -160,7 +162,16 @@ function spawnObstacle() {
 
   let angle = Math.random() * TAU;
   for (let i = 0; i < tries; i += 1) {
-    if (angularDistance(angle, player.angle) > 0.85) {
+    let isValid = angularDistance(angle, player.angle) > 0.85;
+    if (isValid) {
+      for (const obs of obstacles) {
+        if (obs.lane === lane && angularDistance(angle, obs.angle) < 0.5) {
+          isValid = false;
+          break;
+        }
+      }
+    }
+    if (isValid) {
       break;
     }
     angle = Math.random() * TAU;
@@ -217,11 +228,12 @@ function saveCheckpoint() {
     elapsedMs,
     bonusScore,
     spawnEveryMs,
+    currentSpawnDelay,
     obstacleBaseSpeed,
     playerAngle: player.angle,
     playerLane: player.lane,
-    playerAngularVel: player.angularVel,
-    obstacles: obstacles.slice(0, 40),
+    playerAngularVel: 0,
+    obstacles: [],
   };
 
   localStorage.setItem("coloronPaused", "true");
@@ -319,9 +331,10 @@ function updateGame(deltaMs) {
   updatePlayer(deltaSec);
 
   spawnTimer += deltaMs;
-  while (spawnTimer >= spawnEveryMs) {
-    spawnTimer -= spawnEveryMs;
+  while (spawnTimer >= currentSpawnDelay) {
+    spawnTimer -= currentSpawnDelay;
     spawnObstacle();
+    currentSpawnDelay = spawnEveryMs * (0.6 + Math.random() * 0.8);
   }
 
   updateObstacles(deltaSec);
@@ -523,6 +536,7 @@ function resumeRun(state) {
   bonusScore = Number.isFinite(state.bonusScore) ? state.bonusScore : 0;
 
   spawnEveryMs = Number.isFinite(state.spawnEveryMs) ? state.spawnEveryMs : 1150;
+  currentSpawnDelay = Number.isFinite(state.currentSpawnDelay) ? state.currentSpawnDelay : spawnEveryMs;
   obstacleBaseSpeed = Number.isFinite(state.obstacleBaseSpeed)
     ? state.obstacleBaseSpeed
     : 0.9;
@@ -599,6 +613,9 @@ function runStartCountdown(onDone) {
       message.textContent = baseText;
     }
 
+    if (typeof overlay !== "undefined" && overlay) overlay.classList.remove("is-visible");
+    if (typeof startOverlay !== "undefined" && startOverlay) startOverlay.classList.remove("is-visible");
+
     onDone();
   }, 1000);
 }
@@ -642,6 +659,27 @@ window.addEventListener("arcade:menu-exit", () => {
   exitingToMenu = true;
   stopGame();
   hideQuestionModal();
+});
+
+let isMenuPaused = false;
+
+window.addEventListener("arcade:menu-open", () => {
+  if (!running || countdownActive) return;
+  isMenuPaused = true;
+  running = false;
+  cancelAnimationFrame(frameId);
+  frameId = null;
+});
+
+window.addEventListener("arcade:menu-close", () => {
+  if (!isMenuPaused) return;
+  isMenuPaused = false;
+  runStartCountdown(() => {
+    if (exitingToMenu) return;
+    running = true;
+    lastTs = 0; // Reset time so we don't get huge jumps
+    frameId = requestAnimationFrame(loop);
+  });
 });
 
 window.addEventListener("keydown", (event) => {
@@ -772,3 +810,5 @@ function bootFromStorage() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 bootFromStorage();
+
+

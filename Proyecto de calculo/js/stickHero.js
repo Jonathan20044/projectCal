@@ -147,6 +147,8 @@ function runStartCountdown() {
 
   startCountdownActive = true;
 
+  if (startOverlay) startOverlay.classList.add("is-visible");
+
   if (icon) {
     icon.style.display = "none";
   }
@@ -294,8 +296,25 @@ window.addEventListener("resize", function (event) {
 
 window.requestAnimationFrame(animate);
 
+let isMenuPaused = false;
+window.addEventListener("arcade:menu-open", function () {
+  if (phase === "waiting" || startCountdownActive) return;
+  isMenuPaused = true;
+});
+
+window.addEventListener("arcade:menu-close", function () {
+  if (!isMenuPaused) return;
+  isMenuPaused = false;
+  runStartCountdown(function() {
+    lastTimestamp = undefined; // Avoid huge delta time jumps
+    window.requestAnimationFrame(animate);
+  });
+});
+
 // The main game loop
 function animate(timestamp) {
+  if (isMenuPaused) return; // Halt loop entirely during menu
+
   if (!lastTimestamp) {
     lastTimestamp = timestamp;
     window.requestAnimationFrame(animate);
@@ -754,3 +773,4 @@ window.addEventListener("arcade:menu-exit", function () {
     questionModal.setAttribute("aria-hidden", "true");
   }
 });
+

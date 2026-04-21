@@ -229,18 +229,18 @@
       resultTitle.textContent = "¡Respuesta Correcta!";
       resultTitle.style.color = "#00FF66";
       resultMessage.textContent =
-        "¡Magistral! Tu conocimiento está intacto, tienes permiso para continuar la partida ahora mismo.";
+        "¡Bien hecho! Sigue demostrando tu conocimiento con la siguiente pregunta.";
 
       procedureBox.hidden = true;
       continueBtn.innerHTML =
-        "Continuar Partida <i class='bx bx-space-bar'></i>";
+        "Siguiente Pregunta <i class='bx bx-right-arrow-alt'></i>";
     } else {
       resultIcon.innerHTML = "<i class='bx bx-x-circle'></i>";
       resultIcon.className = "result-icon error";
       resultTitle.textContent = "Respuesta Incorrecta";
       resultTitle.style.color = "#FF0055";
       resultMessage.textContent =
-        "Has fallado. Pierdes una vida, pero puedes continuar la partida.";
+        "Has fallado. Tu partida ha terminado y serás enviado a iniciar una nueva.";
       procedureBox.hidden = false;
       procedureText.innerHTML = "";
 
@@ -363,98 +363,56 @@
   continueBtn.addEventListener("click", function () {
     var correct = localStorage.getItem("lastAnswerCorrect") === "true";
 
+    if (correct) {
+      window.location.reload();
+      return;
+    }
+
     if (source === "pacman") {
-      if (correct) {
-        localStorage.setItem("pacmanResumeOk", "true");
-      } else {
-        localStorage.removeItem("pacmanResume");
-        localStorage.setItem("pacmanRestart", "true");
-      }
+      localStorage.removeItem("pacmanResume");
+      localStorage.setItem("pacmanRestart", "true");
       window.location.href = "pacman.html";
       return;
     }
 
     if (source === "flappy") {
-      if (correct) {
-        localStorage.setItem("flappyResumeOk", "true");
-      } else {
-        localStorage.removeItem("flappyResume");
-        localStorage.setItem("flappyRestart", "true");
-      }
+      localStorage.removeItem("flappyResume");
+      localStorage.setItem("flappyRestart", "true");
       window.location.href = "flappyDino.html";
       return;
     }
 
     if (source === "stickHero") {
-      var lives = parseInt(localStorage.getItem("stickHeroLives"), 10);
-      if (!Number.isFinite(lives) || lives < 0) lives = 3;
-
-      if (!correct) {
-        lives = Math.max(0, lives - 1);
-        localStorage.setItem("stickHeroLives", lives);
-      }
-
-      if (lives === 0) {
-        localStorage.setItem("stickHeroRestart", "true");
-        localStorage.removeItem("stickHeroPaused");
-      } else {
-        localStorage.setItem("stickHeroPaused", "true");
-      }
-
+      localStorage.removeItem("stickHeroPaused");
+      localStorage.setItem("stickHeroRestart", "true");
       window.location.href = "stickHero.html";
       return;
     }
 
     if (source === "coloron") {
-      var lives = parseInt(localStorage.getItem("coloronLives"), 10);
-      if (!Number.isFinite(lives) || lives <= 0) {
-        lives = 3;
-      }
-      if (!correct) {
-        lives = lives - 1;
-        localStorage.setItem("coloronLives", lives);
-      }
-      if (lives <= 0) {
-        localStorage.setItem("coloronRestart", "true");
-        localStorage.removeItem("coloronPaused");
-      } else {
-        localStorage.setItem("coloronPaused", "true");
-        localStorage.removeItem("coloronRestart"); // 👈 CLAVE
-      }
-
+      localStorage.setItem("coloronRestart", "true");
+      localStorage.removeItem("coloronPaused");
       window.location.href = "coloron.html";
       return;
     }
 
     if (source === "snake") {
-      if (correct) {
-        localStorage.setItem("snakeResumeOk", "true");
-      } else {
-        localStorage.removeItem("snakeResume");
-        localStorage.setItem("snakeRestart", "true");
-      }
+      localStorage.removeItem("snakeResume");
+      localStorage.setItem("snakeRestart", "true");
       window.location.href = "snake.html";
       return;
     }
 
     if (source === "meteor") {
-      if (correct) {
-        localStorage.setItem("meteorResumeOk", "true");
-      } else {
-        localStorage.removeItem("meteorResume");
-        localStorage.setItem("meteorRestart", "true");
-      }
+      localStorage.removeItem("meteorResume");
+      localStorage.setItem("meteorRestart", "true");
       window.location.href = "meteor.html";
       return;
     }
 
     if (source === "neonbreaker") {
-      if (correct) {
-        localStorage.setItem("neonbreakerResumeOk", "true");
-      } else {
-        localStorage.removeItem("neonbreakerResume");
-        localStorage.setItem("neonbreakerRestart", "true");
-      }
+      localStorage.removeItem("neonbreakerResume");
+      localStorage.setItem("neonbreakerRestart", "true");
       window.location.href = "neonbreaker.html";
       return;
     }
