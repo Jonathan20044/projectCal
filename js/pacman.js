@@ -958,11 +958,17 @@ var PACMAN = (function () {
   function showQuestionModal() {
     var modal = document.getElementById("question-modal");
     if (!modal) {
-      return;
+      return false;
     }
+
     modal.classList.add("is-visible");
     modal.setAttribute("aria-hidden", "false");
+    // Force visible state on mobile browsers that sometimes skip CSS transition updates.
+    modal.style.visibility = "visible";
+    modal.style.opacity = "1";
+    modal.style.zIndex = "6000";
     questionActive = true;
+    return true;
   }
 
   function hideStartOverlay() {
@@ -1138,7 +1144,6 @@ var PACMAN = (function () {
       return;
     }
 
-    questionActive = true;
     hideStartOverlay();
     killCountdown();
     setState(PAUSE);
@@ -1150,7 +1155,19 @@ var PACMAN = (function () {
     dialog("Responde la pregunta");
 
     saveResumeState();
-    showQuestionModal();
+
+    if (!showQuestionModal()) {
+      window.location.href = "questions.html?source=pacman";
+      return;
+    }
+
+    // Safety net: if modal is not visible after paint, navigate directly to questions.
+    window.setTimeout(function () {
+      var modal = document.getElementById("question-modal");
+      if (!modal || !modal.classList.contains("is-visible")) {
+        window.location.href = "questions.html?source=pacman";
+      }
+    }, 120);
   }
 
   function setState(nState) {
