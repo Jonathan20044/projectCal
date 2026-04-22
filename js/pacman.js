@@ -833,8 +833,19 @@ Pacman.Audio = function (game) {
         ended(name);
       };
       playing.push(name);
-      files[name].addEventListener("ended", endEvents[name], true);
-      files[name].play();
+      if (files[name]) {
+        files[name].addEventListener("ended", endEvents[name], true);
+        try {
+          var playPromise = files[name].play();
+          if (playPromise !== undefined) {
+            playPromise.catch(function (error) {
+              console.warn("Audio play prevented:", error);
+            });
+          }
+        } catch (e) {
+          console.warn("Audio play error:", e);
+        }
+      }
     }
   }
 
@@ -1400,7 +1411,11 @@ var PACMAN = (function () {
     }
 
     startTapHandler = function handleStartTap(e) {
-      if (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A") return;
+      var target = e.target;
+      while (target && target !== document.body) {
+        if (target.nodeName === "A" || target.nodeName === "BUTTON") return;
+        target = target.parentNode;
+      }
       var m = document.getElementById("menu-confirm-modal");
       if (m && m.classList.contains("is-visible")) return;
 
@@ -1478,7 +1493,17 @@ var PACMAN = (function () {
   }
 
   function tryStartGame() {
-    if (!ctx || !user || !map) return false; // init() hasn't run yet
+    var overlay = document.getElementById("start-overlay");
+    if (overlay) {
+      overlay.classList.remove("is-visible");
+      overlay.setAttribute("aria-hidden", "true");
+    }
+
+    if (!ctx || !user || !map) {
+      if (typeof initPacmanPage === "function") initPacmanPage();
+      if (!ctx || !user || !map) return false;
+    }
+
     if (state === WAITING && !startCountdownActive && !questionActive) {
       // Ensure the main game loop is running (in case loaded() never fired)
       if (!timer) {
@@ -1901,9 +1926,13 @@ function handleTouchStart(evt) {
   var inModal = false;
   while (target && target !== document.body) {
     if (target.nodeName === "A" || target.nodeName === "BUTTON") return;
-    if (target.classList && target.classList.contains("modal-overlay")) return;
+    if (target.classList && target.classList.contains("modal-overlay") && target.id !== "start-overlay") return;
     target = target.parentNode;
   }
+
+  // Still don't swipe if the start overlay is actually visible
+  var overlay = document.getElementById("start-overlay");
+  if (overlay && overlay.classList.contains("is-visible")) return;
 
   evt.preventDefault();
   var touches = getTouches(evt);
@@ -1975,7 +2004,7 @@ document.addEventListener("touchmove", handleTouchMove, passiveOpt);
     var target = e.target;
     while (target && target !== document.body) {
       if (target.nodeName === "A" || target.nodeName === "BUTTON") return;
-      if (target.classList && target.classList.contains("modal-overlay")) return;
+      if (target.classList && target.classList.contains("modal-overlay") && target.id !== "start-overlay") return;
       target = target.parentNode;
     }
 
