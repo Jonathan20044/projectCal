@@ -958,11 +958,24 @@ var PACMAN = (function () {
   function showQuestionModal() {
     var modal = document.getElementById("question-modal");
     if (!modal) {
+      // Direct redirect if modal is missing from DOM
+      window.location.href = "questions.html?source=pacman";
       return;
     }
+    
+    // Force styles to ensure it breaks through any CSS conflicts on mobile
+    modal.style.setProperty("display", "flex", "important");
+    modal.style.setProperty("visibility", "visible", "important");
+    modal.style.setProperty("opacity", "1", "important");
+    modal.style.setProperty("z-index", "100001", "important");
+    modal.style.setProperty("pointer-events", "auto", "important");
+    
     modal.classList.add("is-visible");
     modal.setAttribute("aria-hidden", "false");
     questionActive = true;
+    
+    // Layout trigger
+    void modal.offsetHeight;
   }
 
   function hideStartOverlay() {
@@ -1138,20 +1151,26 @@ var PACMAN = (function () {
       return;
     }
 
-    hideStartOverlay();
-    killCountdown();
+    try {
+      hideStartOverlay();
+      killCountdown();
 
-    setState(WAITING);
-    user.loseLife();
+      setState(WAITING);
+      user.loseLife();
 
-    audio.pause();
-    map.draw(ctx);
+      audio.pause();
+      map.draw(ctx);
 
-    dialog("Responde la pregunta");
-    setState(PAUSE);
+      dialog("Responde la pregunta");
+      setState(PAUSE);
 
-    saveResumeState();
-    showQuestionModal();
+      saveResumeState();
+      showQuestionModal();
+    } catch (err) {
+      console.error("Error in loseLife:", err);
+      // Fallback redirect if everything fails
+      window.location.href = "questions.html?source=pacman";
+    }
   }
 
   function setState(nState) {
@@ -1268,8 +1287,11 @@ var PACMAN = (function () {
       if (tick - timerStart > Pacman.FPS * 2) {
         loseLife();
       } else {
+        if (userPos) redrawBlock(userPos);
         for (i = 0, len = ghosts.length; i < len; i += 1) {
-          redrawBlock(ghostPos[i].old);
+          if (ghostPos && ghostPos[i]) {
+            redrawBlock(ghostPos[i].old);
+          }
           ghosts[i].draw(ctx);
         }
         user.drawDead(ctx, (tick - timerStart) / (Pacman.FPS * 2));
