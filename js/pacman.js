@@ -958,8 +958,7 @@ var PACMAN = (function () {
   function showQuestionModal() {
     var modal = document.getElementById("question-modal");
     if (!modal) {
-      // Direct redirect if modal is missing from DOM
-      window.location.href = "questions.html?source=pacman";
+      console.warn("Question modal element not found in DOM");
       return;
     }
     
@@ -1168,8 +1167,8 @@ var PACMAN = (function () {
       showQuestionModal();
     } catch (err) {
       console.error("Error in loseLife:", err);
-      // Fallback redirect if everything fails
-      window.location.href = "questions.html?source=pacman";
+      // No more automatic redirect - we want to see what's happening
+      dialog("Error: " + err.message);
     }
   }
 
