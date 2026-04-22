@@ -962,10 +962,10 @@ var PACMAN = (function () {
     }
 
     // Force all visibility properties to bypass CSS caching on mobile
-    modal.style.display = "block";
+    modal.style.display = "flex";
     modal.style.visibility = "visible";
     modal.style.opacity = "1";
-    modal.style.zIndex = "9999";
+    modal.style.zIndex = "99999";
     modal.style.pointerEvents = "auto";
     modal.classList.add("is-visible");
     modal.setAttribute("aria-hidden", "false");
@@ -1178,7 +1178,7 @@ var PACMAN = (function () {
     }
 
     // Safety net 1: Check if modal is actually visible after short delay
-    // Increased from 120ms to 500ms for mobile paint cycles
+    // Increased from 500ms to 800ms for mobile paint cycles
     window.setTimeout(function () {
       if (!questionActive) {
         return; // Already handled
@@ -1197,9 +1197,9 @@ var PACMAN = (function () {
           window.open("questions.html?source=pacman", "_self");
         }
       }
-    }, 500);
+    }, 800);
 
-    // Safety net 2: Ultimate fallback after 2 seconds - force redirect
+    // Safety net 2: Ultimate fallback after 4 seconds - force redirect
     // This handles cases where modal is stuck rendering
     window.setTimeout(function () {
       if (!questionActive) {
@@ -1219,7 +1219,7 @@ var PACMAN = (function () {
       } catch (e) {
         window.open("questions.html?source=pacman", "_self");
       }
-    }, 2000);
+    }, 4000);
   }
 
   function setState(nState) {
@@ -1336,10 +1336,9 @@ var PACMAN = (function () {
       if (tick - timerStart > Pacman.FPS * 2) {
         loseLife();
       } else {
-        redrawBlock(userPos);
         for (i = 0, len = ghosts.length; i < len; i += 1) {
           redrawBlock(ghostPos[i].old);
-          ghostPos.push(ghosts[i].draw(ctx));
+          ghosts[i].draw(ctx);
         }
         user.drawDead(ctx, (tick - timerStart) / (Pacman.FPS * 2));
       }

@@ -66,7 +66,7 @@ a {
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  display: flex !important;
+  display: none;
   align-items: center;
   justify-content: center;
   opacity: 0;
@@ -80,6 +80,7 @@ a {
 }
 
 .modal-overlay.is-visible {
+  display: flex;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -144,26 +145,39 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 15px 40px;
-  background: #FFD700;
+  padding: 16px 40px;
+  background: linear-gradient(135deg, #FFD700, #ffea00);
   color: #0b0c10;
   text-decoration: none;
   border-radius: 30px;
   font-weight: 800;
-  font-size: 1.3rem;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3), 0 0 20px rgba(255,215,0,0.2);
+  font-size: 1.25rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4), 0 0 20px rgba(255,215,0,0.25);
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .modal-btn:hover {
-  background: #ffe642;
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 15px 25px rgba(0,0,0,0.4), 0 0 40px #FFD700;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 40px rgba(255,215,0,0.5);
+  filter: brightness(1.1);
 }
 
 .modal-btn:active {
   transform: translateY(2px) scale(0.98);
-  box-shadow: 0 5px 10px rgba(0,0,0,0.4), 0 0 15px #FFD700;
+}
+
+.danger-btn {
+  background: linear-gradient(135deg, #FF0055, #ff3377);
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(255,0,85,0.3), 0 0 20px rgba(255,0,85,0.2);
+}
+
+.danger-btn:hover {
+  box-shadow: 0 15px 30px rgba(255,0,85,0.4), 0 0 40px rgba(255,0,85,0.5);
 }
 
 #menu-confirm-modal .modal-btn {
