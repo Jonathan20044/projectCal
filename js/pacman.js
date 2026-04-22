@@ -900,31 +900,45 @@ var PACMAN = (function () {
     var overlay = document.getElementById("start-overlay");
     if (!overlay || startCountdownActive) return;
     
-    var icon = overlay.querySelector(".start-message i");
-    var message = overlay.querySelector(".start-message p");
-    var baseText = "Toca o haz clic para iniciar";
+    startCountdownActive = true;
     var count = 3;
     
-    startCountdownActive = true;
+    if (overlay) {
+      overlay.classList.add("is-visible");
+      overlay.setAttribute("aria-hidden", "false");
+    }
     
-    if (overlay) overlay.classList.add("is-visible");
+    // Mostrar el contador
+    var icon = overlay.querySelector(".start-message i");
+    var message = overlay.querySelector(".start-message p");
+    
     if (icon) icon.style.display = "none";
-    if (message) message.textContent = "Inicia en " + count;
+    if (message) {
+      message.textContent = count;
+      message.style.fontSize = "3em";
+      message.style.fontWeight = "bold";
+    }
     
     startCountdownTimer = window.setInterval(function () {
       count -= 1;
       
       if (count > 0) {
-        if (message) message.textContent = "Inicia en " + count;
+        if (message) message.textContent = count;
         return;
       }
       
+      // Countdown finished
       window.clearInterval(startCountdownTimer);
       startCountdownTimer = null;
       startCountdownActive = false;
       
+      // Reset overlay
       if (icon) icon.style.display = "";
-      if (message) message.textContent = baseText;
+      if (message) {
+        message.textContent = "Toca o haz clic para iniciar";
+        message.style.fontSize = "";
+        message.style.fontWeight = "";
+      }
       if (overlay) overlay.classList.remove("is-visible");
       
       onDone();
