@@ -1477,11 +1477,25 @@ var PACMAN = (function () {
     }
   }
 
+  function tryStartGame() {
+    if (!ctx || !user || !map) return false; // init() hasn't run yet
+    if (state === WAITING && !startCountdownActive && !questionActive) {
+      // Ensure the main game loop is running (in case loaded() never fired)
+      if (!timer) {
+        timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
+      }
+      startNewGame();
+      return true;
+    }
+    return false;
+  }
+
   return {
     init: init,
     answerCorrect: answerCorrect,
     answerWrong: answerWrong,
     shutdown: shutdown,
+    tryStartGame: tryStartGame,
   };
 })();
 
@@ -1928,3 +1942,32 @@ function handleTouchMove(evt) {
 
 document.addEventListener("touchstart", handleTouchStart, { passive: false });
 document.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+// ── Global tap-to-start handler (mobile fallback) ──
+// This runs outside the PACMAN closure so it is ALWAYS registered,
+// regardless of whether the async audio-loading completes.
+(function () {
+  function globalStartHandler(e) {
+    // Skip if the target is a button or link
+    if (e.target.tagName === "BUTTON" || e.target.tagName === "A") return;
+    if (e.target.closest && e.target.closest("a, button, .modal")) return;
+
+    // Skip if menu modal is visible
+    var m = document.getElementById("menu-confirm-modal");
+    if (m && m.classList.contains("is-visible")) return;
+
+    // Skip if question modal is visible
+    var q = document.getElementById("question-modal");
+    if (q && q.classList.contains("is-visible")) return;
+
+    // Try to start the game via PACMAN's exposed method
+    if (window.PACMAN && typeof window.PACMAN.tryStartGame === "function") {
+      if (window.PACMAN.tryStartGame()) {
+        if (e.cancelable) e.preventDefault();
+      }
+    }
+  }
+
+  document.addEventListener("touchstart", globalStartHandler, { passive: false });
+  document.addEventListener("mousedown", globalStartHandler, false);
+})();
