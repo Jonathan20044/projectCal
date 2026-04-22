@@ -275,7 +275,7 @@
 
       procedureBox.hidden = true;
       continueBtn.innerHTML =
-        "Siguiente Pregunta <i class='bx bx-right-arrow-alt'></i>";
+        "Continuar el juego <i class='bx bx-right-arrow-alt'></i>";
     } else {
       resultIcon.innerHTML = "<i class='bx bx-x-circle'></i>";
       resultIcon.className = "result-icon error";
