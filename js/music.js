@@ -3,7 +3,6 @@
   if (!AudioContextCtor) return;
 
   let isEnabled = true;
-
   let audioCtx = null;
   let masterGain = null;
   let loopTimer = null;
@@ -31,25 +30,17 @@
     { freq: 392.00, beats: 0.25 }, // G4
   ];
 
-
-  const ensureContext = () => {
+  const initContext = () => {
     if (!audioCtx) {
       audioCtx = new AudioContextCtor();
       masterGain = audioCtx.createGain();
       masterGain.gain.value = 0;
       masterGain.connect(audioCtx.destination);
-
-      // Silent buffer trick for mobile/iOS activation
-      const buffer = audioCtx.createBuffer(1, 1, 22050);
-      const source = audioCtx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(audioCtx.destination);
-      source.start(0);
     }
   };
 
   const playStep = (freq, duration) => {
-    if (!audioCtx || !masterGain) return;
+    if (!audioCtx || !masterGain || audioCtx.state !== "running") return;
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -70,6 +61,13 @@
 
   const scheduleNext = () => {
     if (!isPlaying || !audioCtx) return;
+    
+    // If suspended, wait a bit and try again without killing the loop
+    if (audioCtx.state !== "running") {
+      loopTimer = window.setTimeout(scheduleNext, 500);
+      return;
+    }
+
     const step = sequence[stepIndex % sequence.length];
     const duration = step.beats * beat;
 
@@ -80,75 +78,68 @@
   };
 
   const startMusic = () => {
-    if (isPlaying) return;
-    ensureContext();
+    if (isPlaying) {
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+      return;
+    }
+    initContext();
 
-    // Try to resume immediately
-    const resume = () => {
-      audioCtx
-        .resume()
-        .then(() => {
-          if (!masterGain) return;
+    const tryResume = () => {
+      audioCtx.resume().then(() => {
+        if (audioCtx.state === "running") {
           masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-          masterGain.gain.setTargetAtTime(0.18, audioCtx.currentTime, 0.05);
+          masterGain.gain.setTargetAtTime(0.25, audioCtx.currentTime, 0.1);
           if (!isPlaying) {
             isPlaying = true;
             scheduleNext();
+            removeUnlockListeners();
           }
-        })
-        .catch((err) => {
-          console.warn("Audio resume failed:", err);
-        });
+        }
+      }).catch(err => console.warn("Audio resume failed:", err));
     };
 
-    resume();
+    tryResume();
   };
 
-  const stopMusic = () => {
-    if (!audioCtx || !masterGain) return;
-    isPlaying = false;
-
-    if (loopTimer) {
-      window.clearTimeout(loopTimer);
-      loopTimer = null;
-    }
-
-    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-    masterGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.05);
-
-    window.setTimeout(() => {
-      if (audioCtx && !isPlaying) {
-        audioCtx.suspend();
-      }
-    }, 220);
+  const removeUnlockListeners = () => {
+    const events = ["pointerdown", "touchstart", "touchend", "mousedown", "click", "keydown"];
+    events.forEach((evt) => {
+      document.removeEventListener(evt, handleUnlock, { capture: true });
+    });
   };
 
-  const handleFirstGesture = (e) => {
+  const handleUnlock = (e) => {
     if (!isEnabled) return;
     
-    // Some browsers require explicit creation/resumption in the event loop
-    ensureContext();
-    startMusic();
-
-    // Remove first-time listeners
-    const events = ["pointerdown", "touchstart", "click", "keydown"];
-    events.forEach((evt) => {
-      document.removeEventListener(evt, handleFirstGesture);
-    });
+    if (!audioCtx) {
+      initContext();
+    }
+    
+    // Explicitly call resume() within the handler's execution context
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume().then(() => {
+        if (audioCtx.state === "running" && !isPlaying) {
+          startMusic();
+        }
+      });
+    } else if (!isPlaying) {
+      startMusic();
+    }
   };
 
   const setupListeners = () => {
-    const events = ["pointerdown", "touchstart", "click", "keydown"];
+    const events = ["pointerdown", "touchstart", "touchend", "mousedown", "click", "keydown"];
     events.forEach((evt) => {
-      document.addEventListener(evt, handleFirstGesture, { passive: true });
+      document.addEventListener(evt, handleUnlock, { capture: true });
     });
     
-    // Also add a global click listener to keep it alive/resume if suspended
     document.addEventListener("click", () => {
-      if (audioCtx && audioCtx.state === "suspended" && isPlaying) {
+      if (audioCtx && audioCtx.state === "suspended") {
         audioCtx.resume();
       }
-    }, { passive: true });
+    });
   };
 
   setupListeners();
@@ -158,7 +149,10 @@
     if (document.hidden) {
       audioCtx.suspend();
     } else if (isEnabled) {
+      // On resume, we might need another user gesture on some mobile browsers
+      // but try it anyway
       audioCtx.resume();
     }
   });
 })();
+
