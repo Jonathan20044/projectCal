@@ -549,18 +549,25 @@ function render() {
 document.addEventListener("keydown", function (e) {
   var char = e.which || e.keyCode;
   if (char == 32 || char == 38) {
+    var m = document.getElementById("menu-confirm-modal");
+    if (m && m.classList.contains("is-visible")) return;
     e.preventDefault();
     playerInput();
   }
 });
 
 document.addEventListener("touchstart", function (e) {
-  e.preventDefault();
+  if (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A") return;
+  var m = document.getElementById("menu-confirm-modal");
+  if (m && m.classList.contains("is-visible")) return;
+  if (e.cancelable) e.preventDefault();
   playerInput();
-});
+}, { passive: false });
 
 document.addEventListener("mousedown", function (e) {
   if (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A") return;
+  var m = document.getElementById("menu-confirm-modal");
+  if (m && m.classList.contains("is-visible")) return;
   e.preventDefault();
   playerInput();
 });
@@ -587,9 +594,30 @@ window.addEventListener("arcade:menu-exit", function () {
 });
 
 let isMenuPaused = false;
+let wasCountdownWhenMenuOpened = false;
+
+function killCountdown() {
+  if (startCountdownTimer !== null) {
+    window.clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+  }
+  startCountdownActive = false;
+  var overlay = document.getElementById("start-overlay");
+  if (overlay) {
+    overlay.classList.remove("is-visible");
+    var icon = overlay.querySelector(".start-message i");
+    var message = overlay.querySelector(".start-message p");
+    if (icon) icon.style.display = "";
+    if (message) message.textContent = "Toca o haz clic para iniciar";
+  }
+}
 
 window.addEventListener("arcade:menu-open", function () {
-  if (gameOver || startCountdownActive || !start) return;
+  if (gameOver) return;
+  wasCountdownWhenMenuOpened = startCountdownActive;
+  if (startCountdownActive) {
+    killCountdown();
+  }
   isMenuPaused = true;
   if (updateFrameId !== null) {
     window.cancelAnimationFrame(updateFrameId);
@@ -600,11 +628,25 @@ window.addEventListener("arcade:menu-open", function () {
 window.addEventListener("arcade:menu-close", function () {
   if (gameOver || !isMenuPaused) return;
   isMenuPaused = false;
-  runStartCountdown(function() {
-    if (!gameOver && !exitingToMenu) {
-       updateFrameId = window.requestAnimationFrame(update);
-    }
-  });
+  if (wasCountdownWhenMenuOpened && !start) {
+    wasCountdownWhenMenuOpened = false;
+    runStartCountdown(function() {
+      if (exitingToMenu || start) return;
+      start = true;
+      velocity = lift;
+      dinoAngle = -20;
+      var ctrl = document.getElementById("ctrl-ctn");
+      if (ctrl) ctrl.style.opacity = 0;
+      hideStartOverlay();
+    });
+  } else {
+    wasCountdownWhenMenuOpened = false;
+    runStartCountdown(function() {
+      if (!gameOver && !exitingToMenu) {
+         updateFrameId = window.requestAnimationFrame(update);
+      }
+    });
+  }
 });
 
 update();

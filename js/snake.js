@@ -256,7 +256,11 @@ function runStartCountdown(onDone) {
   }, 1000);
 }
 
-function beginGame(skipCountdown = false) {
+function beginGame(e, skipCountdown = false) {
+  if (e && (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A")) return;
+  var m = document.getElementById("menu-confirm-modal");
+  if (m && m.classList.contains("is-visible")) return;
+
   if (gameStarted || startCountdownActive) return;
 
   const startNow = () => {
@@ -274,10 +278,13 @@ function beginGame(skipCountdown = false) {
   runStartCountdown(startNow);
 }
 
-startOverlay.addEventListener('click', beginGame);
+startOverlay.addEventListener('click', (e) => beginGame(e));
 startOverlay.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  beginGame();
+  if (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A") return;
+  var m = document.getElementById("menu-confirm-modal");
+  if (m && m.classList.contains("is-visible")) return;
+  if (e.cancelable) e.preventDefault();
+  beginGame(e);
 }, { passive: false });
 
 // Resume from questions
@@ -296,20 +303,50 @@ window.addEventListener('arcade:menu-exit', () => {
 });
 
 let isMenuPaused = false;
+let wasCountdownWhenMenuOpened = false;
+
+function killCountdown() {
+  if (startCountdownTimer) {
+    clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+  }
+  startCountdownActive = false;
+  if (startOverlay) {
+    startOverlay.classList.remove("is-visible");
+    var icon = startOverlay.querySelector('.start-message i');
+    var message = startOverlay.querySelector('.start-message p');
+    if (icon) icon.style.display = '';
+    if (message) message.textContent = 'Toca o haz clic para iniciar';
+  }
+}
+
 window.addEventListener("arcade:menu-open", () => {
-  if (!gameRunning || startCountdownActive) return;
-  isMenuPaused = true;
-  gameRunning = false;
-  if (loopId) clearInterval(loopId);
+  wasCountdownWhenMenuOpened = startCountdownActive;
+  if (startCountdownActive) {
+    killCountdown();
+  }
+  if (gameRunning) {
+    isMenuPaused = true;
+    gameRunning = false;
+    if (loopId) clearInterval(loopId);
+  } else if (wasCountdownWhenMenuOpened) {
+    isMenuPaused = true;
+  }
 });
 
 window.addEventListener("arcade:menu-close", () => {
   if (!isMenuPaused) return;
   isMenuPaused = false;
-  runStartCountdown(() => {
-    gameRunning = true;
-    loopId = setInterval(gameLoop, 120);
-  });
+  if (wasCountdownWhenMenuOpened && !gameStarted) {
+    wasCountdownWhenMenuOpened = false;
+    startOverlay.classList.add('is-visible');
+  } else {
+    wasCountdownWhenMenuOpened = false;
+    runStartCountdown(() => {
+      gameRunning = true;
+      loopId = setInterval(gameLoop, 120);
+    });
+  }
 });
 
 // Initial state for display

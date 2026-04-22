@@ -259,23 +259,53 @@ window.addEventListener('arcade:menu-exit', () => {
 });
 
 let isMenuPaused = false;
+let wasCountdownWhenMenuOpened = false;
+
+function killCountdown() {
+  if (startCountdownTimer) {
+    clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+  }
+  startCountdownActive = false;
+  if (startOverlay) {
+    startOverlay.classList.remove("is-visible");
+    var icon = startOverlay.querySelector('.start-message i');
+    var message = startOverlay.querySelector('.start-message p');
+    if (icon) icon.style.display = '';
+    if (message) message.textContent = 'Toca o haz clic para iniciar';
+  }
+}
 
 window.addEventListener("arcade:menu-open", () => {
-  if (!running || startCountdownActive) return;
-  isMenuPaused = true;
-  running = false;
-  cancelAnimationFrame(frameId);
-  frameId = null;
+  wasCountdownWhenMenuOpened = startCountdownActive;
+  if (startCountdownActive) {
+    killCountdown();
+  }
+  if (running) {
+    isMenuPaused = true;
+    running = false;
+    cancelAnimationFrame(frameId);
+    frameId = null;
+  } else if (wasCountdownWhenMenuOpened) {
+    isMenuPaused = true;
+  }
 });
 
 window.addEventListener("arcade:menu-close", () => {
   if (!isMenuPaused) return;
   isMenuPaused = false;
-  runStartCountdown(() => {
-    if (exitingToMenu) return;
-    running = true;
-    frameId = requestAnimationFrame(loop);
-  });
+  if (wasCountdownWhenMenuOpened && !gameStarted) {
+    wasCountdownWhenMenuOpened = false;
+    // They hadn't started yet - show the start overlay again
+    startOverlay.classList.add('is-visible');
+  } else {
+    wasCountdownWhenMenuOpened = false;
+    runStartCountdown(() => {
+      if (exitingToMenu) return;
+      running = true;
+      frameId = requestAnimationFrame(loop);
+    });
+  }
 });
 
 function runStartCountdown(onDone) {
@@ -486,7 +516,11 @@ function showQuestionModal() {
 // ── Start Initiation ───────────────────────
 const startOverlay = document.getElementById('start-overlay');
 
-function beginGame() {
+function beginGame(e) {
+  if (e && (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A")) return;
+  var m = document.getElementById("menu-confirm-modal");
+  if (m && m.classList.contains("is-visible")) return;
+
   exitingToMenu = false;
   if (gameStarted || startCountdownActive) return;
 
@@ -500,8 +534,11 @@ function beginGame() {
 
 startOverlay.addEventListener('click', beginGame);
 startOverlay.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  beginGame();
+  if (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A") return;
+  var m = document.getElementById("menu-confirm-modal");
+  if (m && m.classList.contains("is-visible")) return;
+  if (e.cancelable) e.preventDefault();
+  beginGame(e);
 }, { passive: false });
 
 // Handle returning from questions

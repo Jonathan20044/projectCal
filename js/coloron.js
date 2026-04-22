@@ -621,7 +621,11 @@ function runStartCountdown(onDone) {
 }
 
 function beginGameFromTap(event) {
-  event.preventDefault();
+  if (event.target.tagName === "BUTTON" || event.target.closest("button") || event.target.tagName === "A") return;
+  var m = document.getElementById("menu-confirm-modal");
+  if (m && m.classList.contains("is-visible")) return;
+
+  if (event.cancelable) event.preventDefault();
   event.stopPropagation();
 
   if (running || gameStarted || countdownActive) {
@@ -662,24 +666,62 @@ window.addEventListener("arcade:menu-exit", () => {
 });
 
 let isMenuPaused = false;
+let wasCountdownWhenMenuOpened = false;
+
+function killCountdown() {
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+  countdownActive = false;
+  if (startOverlay) {
+    startOverlay.classList.remove("is-visible");
+    var icon = startOverlay.querySelector(".start-message i");
+    var message = startOverlay.querySelector(".start-message p");
+    if (icon) icon.style.display = "";
+    if (message) message.textContent = "Toca o haz clic para iniciar";
+  }
+}
 
 window.addEventListener("arcade:menu-open", () => {
-  if (!running || countdownActive) return;
-  isMenuPaused = true;
-  running = false;
-  cancelAnimationFrame(frameId);
-  frameId = null;
+  wasCountdownWhenMenuOpened = countdownActive;
+  if (countdownActive) {
+    killCountdown();
+  }
+  if (running) {
+    isMenuPaused = true;
+    running = false;
+    cancelAnimationFrame(frameId);
+    frameId = null;
+  } else if (wasCountdownWhenMenuOpened) {
+    isMenuPaused = true;
+  }
 });
 
 window.addEventListener("arcade:menu-close", () => {
   if (!isMenuPaused) return;
   isMenuPaused = false;
-  runStartCountdown(() => {
-    if (exitingToMenu) return;
-    running = true;
-    lastTs = 0; // Reset time so we don't get huge jumps
-    frameId = requestAnimationFrame(loop);
-  });
+  if (wasCountdownWhenMenuOpened && !gameStarted) {
+    wasCountdownWhenMenuOpened = false;
+    // They hadn't started yet - show the start overlay again
+    showStartOverlay();
+  } else if (wasCountdownWhenMenuOpened && gameStarted) {
+    wasCountdownWhenMenuOpened = false;
+    runStartCountdown(() => {
+      if (exitingToMenu) return;
+      running = true;
+      lastTs = 0;
+      frameId = requestAnimationFrame(loop);
+    });
+  } else {
+    wasCountdownWhenMenuOpened = false;
+    runStartCountdown(() => {
+      if (exitingToMenu) return;
+      running = true;
+      lastTs = 0;
+      frameId = requestAnimationFrame(loop);
+    });
+  }
 });
 
 window.addEventListener("keydown", (event) => {

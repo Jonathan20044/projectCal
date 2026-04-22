@@ -1063,17 +1063,53 @@ var PACMAN = (function () {
     return true;
   }
 
+  var wasCountdownWhenMenuOpened = false;
+  var menuPausedFromState = null;
+
+  function killCountdown() {
+    if (startCountdownTimer !== null) {
+      window.clearInterval(startCountdownTimer);
+      startCountdownTimer = null;
+    }
+    startCountdownActive = false;
+    var overlay = document.getElementById("start-overlay");
+    if (overlay) {
+      overlay.classList.remove("is-visible");
+      var icon = overlay.querySelector(".start-message i");
+      var message = overlay.querySelector(".start-message p");
+      if (icon) icon.style.display = "";
+      if (message) message.textContent = "Toca o haz clic para iniciar";
+    }
+  }
+
   window.addEventListener("arcade:menu-open", function () {
-    if (state === WAITING || state === PAUSE || state === COUNTDOWN || state === DYING) return;
-    stored = state;
-    setState(PAUSE);
-    audio.pause();
-    map.draw(ctx);
-    dialog("Pausado");
+    if (state === PAUSE || state === DYING) return;
+    wasCountdownWhenMenuOpened = startCountdownActive;
+    if (startCountdownActive) {
+      killCountdown();
+      audio.pause();
+    }
+    if (state !== WAITING || wasCountdownWhenMenuOpened) {
+      menuPausedFromState = state;
+      stored = state;
+      setState(PAUSE);
+      audio.pause();
+      map.draw(ctx);
+      dialog("Pausado");
+    }
   });
 
   window.addEventListener("arcade:menu-close", function () {
+    if (wasCountdownWhenMenuOpened) {
+      wasCountdownWhenMenuOpened = false;
+      menuPausedFromState = null;
+      // Restart the level countdown from scratch
+      startLevel();
+      return;
+    }
     if (state !== PAUSE) return;
+    wasCountdownWhenMenuOpened = false;
+    menuPausedFromState = null;
     map.draw(ctx);
     runStartCountdown(function() {
       audio.resume();
@@ -1358,38 +1394,28 @@ var PACMAN = (function () {
     document.addEventListener("keypress", keyPress, true);
 
     // Tap or click to start
-    var wrapper = document.getElementById("pacman");
-    var startOverlay = document.getElementById("start-overlay");
-
-    if (startTapWrapper && startTapHandler) {
-      startTapWrapper.removeEventListener("click", startTapHandler, false);
-      startTapWrapper.removeEventListener("touchend", startTapHandler, false);
-    }
-
-    if (startTapOverlay && startTapHandler) {
-      startTapOverlay.removeEventListener("click", startTapHandler, false);
-      startTapOverlay.removeEventListener("touchstart", startTapHandler, false);
+    if (startTapHandler) {
+      document.removeEventListener("mousedown", startTapHandler, false);
+      document.removeEventListener("touchstart", startTapHandler, false);
     }
 
     startTapHandler = function handleStartTap(e) {
+      if (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A") return;
+      var m = document.getElementById("menu-confirm-modal");
+      if (m && m.classList.contains("is-visible")) return;
+
       if (state === WAITING && !startCountdownActive) {
-        e.preventDefault();
+        if (e.cancelable) {
+          e.preventDefault();
+        }
         startNewGame();
       }
     };
 
-    startTapWrapper = wrapper;
-    startTapOverlay = startOverlay;
-
-    wrapper.addEventListener("click", startTapHandler, false);
-    wrapper.addEventListener("touchend", startTapHandler, false);
-
-    if (startOverlay) {
-      startOverlay.addEventListener("click", startTapHandler, false);
-      startOverlay.addEventListener("touchstart", startTapHandler, {
-        passive: false,
-      });
-    }
+    document.addEventListener("mousedown", startTapHandler, false);
+    document.addEventListener("touchstart", startTapHandler, {
+      passive: false,
+    });
 
     if (timer) {
       window.clearInterval(timer);
@@ -1441,14 +1467,9 @@ var PACMAN = (function () {
     document.removeEventListener("keydown", keyDown, true);
     document.removeEventListener("keypress", keyPress, true);
 
-    if (startTapWrapper && startTapHandler) {
-      startTapWrapper.removeEventListener("click", startTapHandler, false);
-      startTapWrapper.removeEventListener("touchend", startTapHandler, false);
-    }
-
-    if (startTapOverlay && startTapHandler) {
-      startTapOverlay.removeEventListener("click", startTapHandler, false);
-      startTapOverlay.removeEventListener("touchstart", startTapHandler, false);
+    if (startTapHandler) {
+      document.removeEventListener("mousedown", startTapHandler, false);
+      document.removeEventListener("touchstart", startTapHandler, false);
     }
 
     if (audio) {
@@ -1851,8 +1872,22 @@ function getTouches(evt) {
 }
 
 function handleTouchStart(evt) {
-  // Don't prevent default on links (modal buttons)
+  // Don't interfere with modal/overlay touches or button/link taps
   if (evt.target.nodeName === "A" || evt.target.nodeName === "BUTTON") return;
+  if (evt.target.closest && evt.target.closest("a, button")) return;
+
+  // Don't process swipe input if the start overlay is visible
+  var overlay = document.getElementById("start-overlay");
+  if (overlay && overlay.classList.contains("is-visible")) return;
+
+  // Don't process swipe input if the question modal is visible
+  var qModal = document.getElementById("question-modal");
+  if (qModal && qModal.classList.contains("is-visible")) return;
+
+  // Don't process swipe input if the menu modal is visible
+  var mModal = document.getElementById("menu-confirm-modal");
+  if (mModal && mModal.classList.contains("is-visible")) return;
+
   evt.preventDefault();
   const firstTouch = evt.touches[0];
   xDown = firstTouch.clientX;
@@ -1860,8 +1895,8 @@ function handleTouchStart(evt) {
 }
 
 function handleTouchMove(evt) {
-  evt.preventDefault();
   if (xDown === null || yDown === null) return;
+  evt.preventDefault();
 
   var xUp = evt.touches[0].clientX;
   var yUp = evt.touches[0].clientY;

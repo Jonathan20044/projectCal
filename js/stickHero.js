@@ -135,7 +135,7 @@ function hideStartOverlay() {
   startOverlay.setAttribute("aria-hidden", "true");
 }
 
-function runStartCountdown() {
+function runStartCountdown(onDone) {
   if (!startOverlay || startCountdownActive || startUnlocked) {
     return;
   }
@@ -179,6 +179,10 @@ function runStartCountdown() {
     }
 
     hideStartOverlay();
+
+    if (typeof onDone === "function") {
+      onDone();
+    }
   }, 1000);
 }
 
@@ -231,8 +235,9 @@ function generatePlatform() {
   platforms.push({ x, w });
 }
 
-// If space was pressed restart the game
 window.addEventListener("keydown", function (event) {
+  var m = document.getElementById("menu-confirm-modal");
+  if (m && m.classList.contains("is-visible")) return;
   if (event.key == " ") {
     if (!ensureStartUnlocked()) {
       event.preventDefault();
@@ -247,6 +252,10 @@ window.addEventListener("keydown", function (event) {
 });
 
 window.addEventListener("mousedown", function (event) {
+  if (event.target.tagName === "BUTTON" || event.target.closest("button") || event.target.tagName === "A") return;
+  var m = document.getElementById("menu-confirm-modal");
+  if (m && m.classList.contains("is-visible")) return;
+
   if (!ensureStartUnlocked()) {
     return;
   }
@@ -262,6 +271,10 @@ window.addEventListener("mousedown", function (event) {
 });
 
 window.addEventListener("touchstart", function (event) {
+  if (event.target.tagName === "BUTTON" || event.target.closest("button") || event.target.tagName === "A") return;
+  var m = document.getElementById("menu-confirm-modal");
+  if (m && m.classList.contains("is-visible")) return;
+
   if (!ensureStartUnlocked()) {
     return;
   }
@@ -274,7 +287,7 @@ window.addEventListener("touchstart", function (event) {
     phase = "stretching";
     window.requestAnimationFrame(animate);
   }
-});
+}, { passive: false });
 
 window.addEventListener("mouseup", function (event) {
   if (phase == "stretching") {
@@ -297,18 +310,49 @@ window.addEventListener("resize", function (event) {
 window.requestAnimationFrame(animate);
 
 let isMenuPaused = false;
+let wasCountdownWhenMenuOpened = false;
+
+function killCountdown() {
+  if (startCountdownTimer !== null) {
+    window.clearInterval(startCountdownTimer);
+    startCountdownTimer = null;
+  }
+  startCountdownActive = false;
+  var overlay = document.getElementById("start-overlay");
+  if (overlay) {
+    overlay.classList.remove("is-visible");
+    var icon = overlay.querySelector(".start-message i");
+    var message = overlay.querySelector(".start-message p");
+    if (icon) icon.style.display = "";
+    if (message) message.textContent = "Toca o haz clic para iniciar";
+  }
+  startUnlocked = false;
+}
+
 window.addEventListener("arcade:menu-open", function () {
-  if (phase === "waiting" || startCountdownActive) return;
+  wasCountdownWhenMenuOpened = startCountdownActive;
+  if (startCountdownActive) {
+    killCountdown();
+  }
   isMenuPaused = true;
 });
 
 window.addEventListener("arcade:menu-close", function () {
   if (!isMenuPaused) return;
   isMenuPaused = false;
-  runStartCountdown(function() {
-    lastTimestamp = undefined; // Avoid huge delta time jumps
-    window.requestAnimationFrame(animate);
-  });
+  if (wasCountdownWhenMenuOpened) {
+    wasCountdownWhenMenuOpened = false;
+    // Restart the initial start countdown
+    runStartCountdown();
+  } else if (phase !== "waiting") {
+    wasCountdownWhenMenuOpened = false;
+    runStartCountdown(function() {
+      lastTimestamp = undefined;
+      window.requestAnimationFrame(animate);
+    });
+  } else {
+    wasCountdownWhenMenuOpened = false;
+  }
 });
 
 // The main game loop
