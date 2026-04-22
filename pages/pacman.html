@@ -127,6 +127,33 @@
       }
     });
   })();
+
+  // ── Direct tap-to-start on the overlay (iOS Safari fix) ──
+  // iOS Safari sometimes doesn't bubble touchstart to document correctly.
+  // Listening directly on the overlay element guarantees it works.
+  var _overlay = document.getElementById("start-overlay");
+  if (_overlay) {
+    // Make the overlay explicitly tappable on iOS
+    _overlay.style.cursor = "pointer";
+    _overlay.style.webkitTapHighlightColor = "transparent";
+    _overlay.style.touchAction = "manipulation";
+
+    function handleOverlayTap() {
+      // Don't do anything if a modal is open
+      var m = document.getElementById("menu-confirm-modal");
+      if (m && m.classList.contains("is-visible")) return;
+
+      if (window.PACMAN && typeof window.PACMAN.tryStartGame === "function") {
+        window.PACMAN.tryStartGame();
+      }
+    }
+
+    _overlay.addEventListener("click", handleOverlayTap);
+    _overlay.addEventListener("touchend", function(e) {
+      e.preventDefault(); // Prevent ghost click on iOS
+      handleOverlayTap();
+    }, { passive: false });
+  }
 </script>
 
 </body>
