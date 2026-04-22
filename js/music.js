@@ -38,6 +38,13 @@
       masterGain = audioCtx.createGain();
       masterGain.gain.value = 0;
       masterGain.connect(audioCtx.destination);
+
+      // Silent buffer trick for mobile/iOS activation
+      const buffer = audioCtx.createBuffer(1, 1, 22050);
+      const source = audioCtx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioCtx.destination);
+      source.start(0);
     }
   };
 
@@ -76,18 +83,25 @@
     if (isPlaying) return;
     ensureContext();
 
-    audioCtx
-      .resume()
-      .then(() => {
-        if (!masterGain) return;
-        masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-        masterGain.gain.setTargetAtTime(0.18, audioCtx.currentTime, 0.05);
-        isPlaying = true;
-        scheduleNext();
-      })
-      .catch(() => {
-        // Ignore resume errors from browser autoplay policies.
-      });
+    // Try to resume immediately
+    const resume = () => {
+      audioCtx
+        .resume()
+        .then(() => {
+          if (!masterGain) return;
+          masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+          masterGain.gain.setTargetAtTime(0.18, audioCtx.currentTime, 0.05);
+          if (!isPlaying) {
+            isPlaying = true;
+            scheduleNext();
+          }
+        })
+        .catch((err) => {
+          console.warn("Audio resume failed:", err);
+        });
+    };
+
+    resume();
   };
 
   const stopMusic = () => {
@@ -109,17 +123,35 @@
     }, 220);
   };
 
-  const handleFirstGesture = () => {
+  const handleFirstGesture = (e) => {
     if (!isEnabled) return;
+    
+    // Some browsers require explicit creation/resumption in the event loop
+    ensureContext();
     startMusic();
+
+    // Remove first-time listeners
+    const events = ["pointerdown", "touchstart", "click", "keydown"];
+    events.forEach((evt) => {
+      document.removeEventListener(evt, handleFirstGesture);
+    });
   };
 
+  const setupListeners = () => {
+    const events = ["pointerdown", "touchstart", "click", "keydown"];
+    events.forEach((evt) => {
+      document.addEventListener(evt, handleFirstGesture, { passive: true });
+    });
+    
+    // Also add a global click listener to keep it alive/resume if suspended
+    document.addEventListener("click", () => {
+      if (audioCtx && audioCtx.state === "suspended" && isPlaying) {
+        audioCtx.resume();
+      }
+    }, { passive: true });
+  };
 
-  document.addEventListener("pointerdown", handleFirstGesture, {
-    once: true,
-    passive: true,
-  });
-  document.addEventListener("keydown", handleFirstGesture, { once: true });
+  setupListeners();
 
   document.addEventListener("visibilitychange", () => {
     if (!audioCtx || !isPlaying) return;
