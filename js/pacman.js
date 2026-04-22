@@ -772,9 +772,9 @@ Pacman.Map = function (size) {
 };
 
 Pacman.Audio = function (game) {
-  var files = [],
-    endEvents = [],
-    progressEvents = [],
+  var files = {},
+    endEvents = {},
+    progressEvents = {},
     playing = [];
 
   function load(name, path, cb) {
@@ -804,8 +804,10 @@ Pacman.Audio = function (game) {
 
   function disableSound() {
     for (var i = 0; i < playing.length; i++) {
-      files[playing[i]].pause();
-      files[playing[i]].currentTime = 0;
+      if (files[playing[i]]) {
+        files[playing[i]].pause();
+        files[playing[i]].currentTime = 0;
+      }
     }
     playing = [];
   }
@@ -815,10 +817,12 @@ Pacman.Audio = function (game) {
       tmp = [],
       found = false;
 
-    files[name].removeEventListener("ended", endEvents[name], true);
+    if (files[name]) {
+      files[name].removeEventListener("ended", endEvents[name], true);
+    }
 
     for (i = 0; i < playing.length; i++) {
-      if (!found && playing[i]) {
+      if (!found && playing[i] === name) {
         found = true;
       } else {
         tmp.push(playing[i]);
@@ -828,36 +832,38 @@ Pacman.Audio = function (game) {
   }
 
   function play(name) {
-    if (!game.soundDisabled()) {
+    if (!game.soundDisabled() && files[name]) {
       endEvents[name] = function () {
         ended(name);
       };
       playing.push(name);
-      if (files[name]) {
-        files[name].addEventListener("ended", endEvents[name], true);
-        try {
-          var playPromise = files[name].play();
-          if (playPromise !== undefined) {
-            playPromise.catch(function (error) {
-              console.warn("Audio play prevented:", error);
-            });
-          }
-        } catch (e) {
-          console.warn("Audio play error:", e);
+      files[name].addEventListener("ended", endEvents[name], true);
+      try {
+        var playPromise = files[name].play();
+        if (playPromise !== undefined) {
+          playPromise.catch(function (error) {
+            console.warn("Audio play prevented:", error);
+          });
         }
+      } catch (e) {
+        console.warn("Audio play error:", e);
       }
     }
   }
 
   function pause() {
     for (var i = 0; i < playing.length; i++) {
-      files[playing[i]].pause();
+      if (files[playing[i]]) {
+        files[playing[i]].pause();
+      }
     }
   }
 
   function resume() {
     for (var i = 0; i < playing.length; i++) {
-      files[playing[i]].play();
+      if (files[playing[i]]) {
+        files[playing[i]].play();
+      }
     }
   }
 
