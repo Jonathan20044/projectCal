@@ -288,7 +288,22 @@ startOverlay.addEventListener('touchstart', (e) => {
 }, { passive: false });
 
 // Resume from questions
-if (localStorage.getItem('snakeRestart') === 'true') { localStorage.removeItem('snakeRestart'); }
+if (localStorage.getItem('snakeRestart') === 'true') { 
+  localStorage.removeItem('snakeRestart');
+  // Show question modal was closed, start fresh game
+}
+
+if (localStorage.getItem('snakeResumeOk') === 'true') {
+  localStorage.removeItem('snakeResumeOk');
+  // Hide question modal when resuming after correct answer
+  setTimeout(function() {
+    const m = document.getElementById('question-modal');
+    if (m) {
+      m.classList.remove('is-visible');
+      m.setAttribute('aria-hidden', 'true');
+    }
+  }, 100);
+}
 
 // Menu handling
 window.addEventListener('arcade:menu-exit', () => {

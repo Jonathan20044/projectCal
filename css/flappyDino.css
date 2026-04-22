@@ -25,11 +25,17 @@ canvas {
 
 #scoreboard {
   position: absolute;
-  top: 540px;
-  width: 100%;
-  text-align: center;
-  font-size: 50px;
-  color: #333333;
+  top: 20px;
+  right: 20px;
+  font-size: 32px;
+  font-weight: bold;
+  color: #FFD700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: 'Arial', sans-serif;
 }
 
 #start-screen {

@@ -326,6 +326,8 @@ function playerInput() {
 }
 
 function checkCollision() {
+  if (gameOver) return;
+
   // set upper bound
   if (dinoPos_Y <= -hitboxHeight) {
     velocity = 0;
@@ -387,9 +389,41 @@ function replay() {
 
 function setGameOver() {
   gameOver = true;
-  document.getElementById("gameover-screen").style.visibility = "visible";
-  document.getElementById("gameover-screen").style.opacity = 1;
+  saveResumeState();
   showQuestionModal();
+}
+
+
+function saveResumeState() {
+  var payload = {
+    score: score,
+    dinoX: dinoPos_X,
+    dinoY: dinoPos_Y,
+    velocity: velocity,
+    dinoAngle: dinoAngle,
+    bones: bones,
+    scrollOffset: fgPos_X,
+  };
+  localStorage.setItem("flappyResume", JSON.stringify(payload));
+}
+
+function answerCorrect() {
+  var modal = document.getElementById("question-modal");
+  if (modal) {
+    modal.classList.remove("is-visible");
+    modal.setAttribute("aria-hidden", "true");
+  }
+  gameOver = false;
+}
+
+function answerWrong() {
+  localStorage.removeItem("flappyResume");
+  
+  var modal = document.getElementById("question-modal");
+  modal.classList.remove("is-visible");
+  modal.setAttribute("aria-hidden", "true");
+  
+  replay();
 }
 
 function showQuestionModal() {
@@ -397,6 +431,12 @@ function showQuestionModal() {
   if (!modal) {
     return;
   }
+  modal.style.setProperty("display", "flex", "important");
+  modal.style.setProperty("visibility", "visible", "important");
+  modal.style.setProperty("opacity", "1", "important");
+  modal.style.setProperty("z-index", "100001", "important");
+  modal.style.setProperty("pointer-events", "auto", "important");
+  
   modal.classList.add("is-visible");
   modal.setAttribute("aria-hidden", "false");
 }
@@ -426,18 +466,20 @@ function update() {
 
   // game started
   if (start) {
-    velocity += gravity;
-    dinoPos_Y += velocity;
+    if (!gameOver) {
+      velocity += gravity;
+      dinoPos_Y += velocity;
 
-    // if velocity is negative show dino flap sprite else show dino falling
-    if (velocity < 0) {
-      dinoState = dinoFlap;
-    } else {
-      dinoState = dinoGlide;
-      dinoAngle = Math.min(dinoAngle + 2, 90);
+      // if velocity is negative show dino flap sprite else show dino falling
+      if (velocity < 0) {
+        dinoState = dinoFlap;
+      } else {
+        dinoState = dinoGlide;
+        dinoAngle = Math.min(dinoAngle + 2, 90);
+      }
+
+      checkCollision();
     }
-
-    checkCollision();
 
     if (!gameOver) {
       for (var i = 0; i < bones.length; i++) {
@@ -573,10 +615,60 @@ document.addEventListener("mousedown", function (e) {
 });
 
 document.getElementById("replay").addEventListener("click", function () {
+  var modal = document.getElementById("question-modal");
+  // No permitir replay si el modal de preguntas está visible
+  if (modal && modal.classList.contains("is-visible")) return;
   replay();
 });
 
-if (localStorage.getItem("flappyRestart") === "true") { localStorage.removeItem("flappyRestart"); }
+// Handle returning from questions
+var flappyResumeOk = localStorage.getItem("flappyResumeOk") === "true";
+var flappyRestart = localStorage.getItem("flappyRestart") === "true";
+
+localStorage.removeItem("flappyResumeOk");
+localStorage.removeItem("flappyRestart");
+
+if (flappyRestart) {
+  localStorage.removeItem("flappyResume");
+} else if (flappyResumeOk) {
+  // Restore the saved state before showing question modal was closed
+  var resumeRaw = localStorage.getItem("flappyResume");
+  if (resumeRaw) {
+    var resumeData = JSON.parse(resumeRaw);
+    score = resumeData.score || 0;
+    dinoPos_X = resumeData.dinoX || 100;
+    dinoPos_Y = resumeData.dinoY || 250;
+    velocity = resumeData.velocity || 0;
+    dinoAngle = resumeData.dinoAngle || 0;
+    bones = resumeData.bones || [];
+    fgPos_X = resumeData.scrollOffset || 0;
+    
+    // Mover los obstáculos hacia la derecha para dar tiempo de reacción
+    for (var i = 0; i < bones.length; i++) {
+      bones[i].x += 250;
+    }
+    
+    // Si murió tocando el suelo o techo, reubicarlo a una altura segura
+    if (dinoPos_Y > 400) dinoPos_Y = 400;
+    if (dinoPos_Y < 50) dinoPos_Y = 50;
+  }
+  localStorage.removeItem("flappyResume");
+  
+  start = true;
+  gameOver = true; // freeze screen until countdown finishes
+  
+  var ctrl = document.getElementById("ctrl-ctn");
+  if (ctrl) ctrl.style.opacity = 0;
+  hideStartOverlay();
+  
+  runStartCountdown(function() {
+    // Al finalizar el conteo de 3,2,1 reanudamos el juego
+    answerCorrect();
+    // Le damos un pequeño impulso para evitar morir de forma instantánea al aparecer
+    velocity = lift;
+    dinoAngle = -20;
+  });
+}
 
 window.addEventListener("arcade:menu-exit", function () {
   exitingToMenu = true;

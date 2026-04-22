@@ -678,6 +678,16 @@ Pacman.Map = function (size) {
     map[pos.y][pos.x] = type;
   }
 
+  function getMapData() {
+    return map;
+  }
+
+  function loadState(savedMap) {
+    map = savedMap;
+    height = map.length;
+    width = map[0].length;
+  }
+
   function drawPills(ctx) {
     if (++pillSize > 30) {
       pillSize = 0;
@@ -763,6 +773,8 @@ Pacman.Map = function (size) {
     block: block,
     setBlock: setBlock,
     reset: reset,
+    getMapData: getMapData,
+    loadState: loadState,
     isWallSpace: isWall,
     isFloorSpace: isFloorSpace,
     height: height,
@@ -993,38 +1005,25 @@ var PACMAN = (function () {
   }
 
   function answerCorrect() {
-    var resumeRaw = localStorage.getItem("pacmanResume");
-
-    if (resumeRaw) {
-      var resumeData = JSON.parse(resumeRaw);
-
-      level = resumeData.level || 1;
-
-      user.reset();
-      user.setLives(resumeData.lives);
-      user.setScore(resumeData.score);
-
-      map.reset();
-      map.draw(ctx);
-
-      startLevel();
-    }
-
-    localStorage.removeItem("pacmanResume");
-
     var modal = document.getElementById("question-modal");
-    modal.classList.remove("is-visible");
-    modal.setAttribute("aria-hidden", "true");
-
+    if (modal) {
+      modal.classList.remove("is-visible");
+      modal.setAttribute("aria-hidden", "true");
+    }
     questionActive = false;
+    
+    // El juego ya tiene el estado guardado, solo continúa
+    setState(PLAYING);
   }
 
   function answerWrong() {
     localStorage.removeItem("pacmanResume");
 
     var modal = document.getElementById("question-modal");
-    modal.classList.remove("is-visible");
-    modal.setAttribute("aria-hidden", "true");
+    if (modal) {
+      modal.classList.remove("is-visible");
+      modal.setAttribute("aria-hidden", "true");
+    }
 
     questionActive = false;
 
@@ -1036,6 +1035,7 @@ var PACMAN = (function () {
       lives: user.getLives(),
       score: user.theScore(),
       level: level,
+      map: map.getMapData()
     };
     localStorage.setItem("pacmanResume", JSON.stringify(payload));
   }
@@ -1520,13 +1520,28 @@ var PACMAN = (function () {
 
     if (resumeOk && resumeRaw) {
       var resumeData = JSON.parse(resumeRaw);
-      localStorage.removeItem("pacmanResume");
       level = resumeData.level || 1;
+      
+      // Load map stringified if we have it
+      if (resumeData.map) {
+         try {
+           map.loadState(resumeData.map);
+         } catch(e){}
+      }
+      
       user.reset();
       user.setLives(resumeData.lives || 1);
       user.setScore(resumeData.score || 0);
-      map.reset();
       map.draw(ctx);
+      
+      var modal = document.getElementById("question-modal");
+      if (modal) {
+        modal.classList.remove("is-visible");
+        modal.setAttribute("aria-hidden", "true");
+      }
+      questionActive = false;
+      
+      // Reiniciar los fantasmas y empezar el nivel con el contador
       startLevel();
       return;
     }
@@ -1609,7 +1624,6 @@ var PACMAN = (function () {
   };
 })();
 
-/* Human readable keyCode index */
 var KEY = {
   BACKSPACE: 8,
   TAB: 9,
@@ -2101,5 +2115,5 @@ document.addEventListener("touchmove", handleTouchMove, passiveOpt);
   }
 
   document.addEventListener("touchstart", globalStartHandler, passiveOpt);
-  document.addEventListener("mousedown", globalStartHandler, false);
+   document.addEventListener("mousedown", globalStartHandler, false);
 })();

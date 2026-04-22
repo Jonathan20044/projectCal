@@ -620,7 +620,7 @@ const restart = localStorage.getItem('neonbreakerRestart') === 'true';
 localStorage.removeItem('neonbreakerResumeOk');
 localStorage.removeItem('neonbreakerRestart');
 
-if (restart) { localStorage.removeItem('neonbreakerResume'); } else if (resumeOk) {
+if (restart) { localStorage.removeItem('neonbreakerResume'); beginGame(); } else if (resumeOk) {
   const resumeRaw = localStorage.getItem('neonbreakerResume');
   if (resumeRaw) {
     const state = JSON.parse(resumeRaw);
@@ -631,6 +631,14 @@ if (restart) { localStorage.removeItem('neonbreakerResume'); } else if (resumeOk
       resumeGame(state);
     }
   }
+  // Hide question modal when resuming after correct answer
+  setTimeout(function() {
+    const m = document.getElementById('question-modal');
+    if (m) {
+      m.classList.remove('is-visible');
+      m.setAttribute('aria-hidden', 'true');
+    }
+  }, 100);
 }
 
 function idle() {

@@ -548,7 +548,10 @@ const restart = localStorage.getItem('meteorRestart') === 'true';
 localStorage.removeItem('meteorResumeOk');
 localStorage.removeItem('meteorRestart');
 
-if (restart) { localStorage.removeItem('meteorResume'); } else if (resumeOk) {
+if (restart) { 
+  localStorage.removeItem('meteorResume'); 
+  beginGame();
+} else if (resumeOk) {
   const resumeRaw = localStorage.getItem('meteorResume');
   if (resumeRaw) {
     const state = JSON.parse(resumeRaw);
@@ -559,6 +562,14 @@ if (restart) { localStorage.removeItem('meteorResume'); } else if (resumeOk) {
       resumeGame(state);
     }
   }
+  // Hide question modal when resuming after correct answer
+  setTimeout(function() {
+    const m = document.getElementById('question-modal');
+    if (m) {
+      m.classList.remove('is-visible');
+      m.setAttribute('aria-hidden', 'true');
+    }
+  }, 100);
 }
 
 // Initial draw while waiting
