@@ -1496,6 +1496,16 @@ var PACMAN = (function () {
     answerWrong: answerWrong,
     shutdown: shutdown,
     tryStartGame: tryStartGame,
+    triggerKey: function (keyCode) {
+      var fakeEvent = {
+        keyCode: keyCode,
+        preventDefault: function () {},
+        stopPropagation: function () {},
+      };
+      if (typeof keyDown === "function") {
+        keyDown(fakeEvent);
+      }
+    }
   };
 })();
 
@@ -1927,11 +1937,18 @@ function handleTouchMove(evt) {
     keyCode = yDiff > 0 ? 38 : 40; // up : down
   }
 
-  // Dispatch a native event with cross-browser keyCode polyfill (especially for iOS Safari)
-  var e = new Event("keydown", { bubbles: true, cancelable: true });
-  Object.defineProperty(e, "keyCode", { get: function() { return keyCode; } });
-  Object.defineProperty(e, "which", { get: function() { return keyCode; } });
-  document.dispatchEvent(e);
+  // Dispatch via direct method call to bypass iOS Safari KeyboardEvent bugs
+  if (window.PACMAN && typeof window.PACMAN.triggerKey === "function") {
+    window.PACMAN.triggerKey(keyCode);
+  } else {
+    // Fallback if PACMAN isn't ready
+    var e = new KeyboardEvent("keydown", {
+      keyCode: keyCode,
+      which: keyCode,
+      bubbles: true,
+    });
+    document.dispatchEvent(e);
+  }
 
   // Reset so the next swipe starts fresh
   xDown = null;
