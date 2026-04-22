@@ -1114,16 +1114,24 @@ var PACMAN = (function () {
     }
   }
 
+  var isMenuPaused = false;
+
   window.addEventListener("arcade:menu-open", function () {
-    if (state === PAUSE || state === DYING) return;
+    if (state === DYING) return;
+    if (isMenuPaused) return;
+
     wasCountdownWhenMenuOpened = startCountdownActive;
     if (startCountdownActive) {
       killCountdown();
       audio.pause();
     }
+
     if (state !== WAITING || wasCountdownWhenMenuOpened) {
-      menuPausedFromState = state;
-      stored = state;
+      isMenuPaused = true;
+      if (state !== PAUSE) {
+        menuPausedFromState = state;
+        stored = state;
+      }
       setState(PAUSE);
       audio.pause();
       map.draw(ctx);
@@ -1132,23 +1140,36 @@ var PACMAN = (function () {
   });
 
   window.addEventListener("arcade:menu-close", function () {
+    if (!isMenuPaused && !wasCountdownWhenMenuOpened) return;
+    isMenuPaused = false;
+
     if (wasCountdownWhenMenuOpened) {
       wasCountdownWhenMenuOpened = false;
       menuPausedFromState = null;
-      // Restart the level countdown from scratch
+      // Limpiar mensaje de pausa y asegurar estado correcto antes de re-iniciar nivel
+      setState(WAITING);
+      map.draw(ctx);
       startLevel();
       return;
     }
+
     if (state !== PAUSE) return;
     wasCountdownWhenMenuOpened = false;
-    menuPausedFromState = null;
-    map.draw(ctx);
-    runStartCountdown(function () {
-      audio.resume();
-      timerStart = tick;
-      safeUntilTick = tick + Pacman.FPS * 2;
-      setState(PLAYING);
-    });
+
+    if (menuPausedFromState !== null && menuPausedFromState !== WAITING) {
+      menuPausedFromState = null;
+      map.draw(ctx);
+      runStartCountdown(function () {
+        audio.resume();
+        timerStart = tick;
+        safeUntilTick = tick + Pacman.FPS * 2;
+        setState(PLAYING);
+      });
+    } else {
+      menuPausedFromState = null;
+      setState(WAITING);
+      map.draw(ctx);
+    }
   });
 
   function loseLife() {
@@ -1447,11 +1468,9 @@ var PACMAN = (function () {
     }
 
     startTapHandler = function handleStartTap(e) {
-      var target = e.target;
-      while (target && target !== document.body) {
-        if (target.nodeName === "A" || target.nodeName === "BUTTON") return;
-        target = target.parentNode;
-      }
+      if (e.target.tagName === "BUTTON" || e.target.closest("button") ||
+          e.target.tagName === "A" || e.target.closest("a")) return;
+          
       var m = document.getElementById("menu-confirm-modal");
       if (m && m.classList.contains("is-visible")) return;
       var q = document.getElementById("question-modal");
@@ -1487,6 +1506,9 @@ var PACMAN = (function () {
       }
 
       startOverlayTapHandler = function startNewGameDirectly(e) {
+        if (e.target.tagName === "BUTTON" || e.target.closest("button") ||
+            e.target.tagName === "A" || e.target.closest("a")) return;
+        
         e.preventDefault();
         e.stopPropagation();
         tryStartGame();

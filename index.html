@@ -31,6 +31,7 @@
     <div class="game-grid">
       <a href="pages/pacman.html" class="game-card" style="--accent: #FFD700;"
          data-title="Pacman" data-icon="bxs-ghost"
+         data-goal="Recorre el laberinto comiendo todos los puntos mientras escapas de los fantasmas. ¡Come los puntos grandes para poder cazarlos por tiempo limitado!"
          data-pc="Usa las <b>Flechas Direccionales</b> de tu teclado para mover a Pacman por el laberinto."
          data-mobile="<b>Desliza tu dedo</b> (Swipe) por la pantalla en la dirección a la que quieras ir.">
         <div class="card-inner">
@@ -44,8 +45,9 @@
       
       <a href="pages/flappyDino.html" class="game-card" style="--accent: #00FF66;"
          data-title="Flappy Dino" data-icon="bx-run"
+         data-goal="Mantén al dinosaurio en el aire saltando a través de los huecos entre los huesos. ¡Si tocas un hueso o el suelo, pierdes!"
          data-pc="Haz clic con el ratón o presiona la <b>barra espaciadora</b> para hacer volar al personaje."
-         data-mobile="<b>Toca la pantalla</b> repetidamente para saltar en el aire.">
+         data-mobile="<b>Toca la pantalla</b> repetidamente para saltar en el aire y mantener el vuelo.">
         <div class="card-inner">
           <div class="icon-placeholder">
             <i class='bx bx-run'></i>
@@ -57,8 +59,9 @@
       
       <a href="pages/stickHero.html" class="game-card" style="--accent: #00E5FF;"
          data-title="Stick Hero" data-icon="bx-ruler"
-         data-pc="<b>Mantén el clic izquierdo</b> presionado para extender el puente y suelta para dejarlo caer sobre la plataforma."
-         data-mobile="<b>Manten el dedo pulsado</b> en la pantalla para hacer crecer el puento y suéltalo para caer a la distancia correcta.">
+         data-goal="Calcula la longitud exacta del puente para cruzar entre plataformas. Si el puente es muy corto o muy largo, caerás al vacío."
+         data-pc="<b>Mantén el clic izquierdo</b> o la <b>barra Espacio</b> para extender el puente y suéltalo para dejarlo caer."
+         data-mobile="<b>Mantén el dedo pulsado</b> en la pantalla para hacer crecer el puente y suéltalo para avanzar.">
         <div class="card-inner">
           <div class="icon-placeholder">
             <i class='bx bx-ruler'></i>
@@ -68,25 +71,28 @@
         </div>
       </a>
       
-      <a href="pages/coloron.html" class="game-card" style="--accent: #00E5FF;"
+      <a href="pages/coloron.html" class="game-card" style="--accent: #FF3366;"
          data-title="Orbit Rift" data-icon="bxs-planet"
-         data-pc="Usa <b>A / D</b> o las <b>Flechas Izquierda / Derecha</b> para rotar, y <b>Espacio</b> para cambiar de orbita."
-         data-mobile="<b>Desliza horizontalmente</b> para rotar alrededor del nucleo y <b>toca</b> para cambiar entre orbita interna/externa.">
+         data-goal="Gira alrededor del núcleo y cambia entre órbitas internas y externas para evitar obstáculos y recolectar puntos."
+         data-pc="Usa <b>A / D</b> o las <b>Flechas</b> para rotar, y la tecla <b>Espacio</b> para cambiar de órbita."
+         data-mobile="<b>Desliza horizontalmente</b> para rotar y <b>toca la pantalla</b> para cambiar de órbita.">
         <div class="card-inner">
           <div class="icon-placeholder">
             <i class='bx bxs-planet'></i>
           </div>
           <h2>Orbit Rift</h2>
-          <p>Gira y cambia de orbita</p>
+          <p>Gira y cambia de órbita</p>
         </div>
       </a>
-      <a href="pages/meteor.html" class="game-card" style="--accent: #00E5FF;"
-         data-title="Meteor Dash" data-icon="bxs-planet"
-         data-pc="Usa las <b>Flechas Izquierda / Derecha</b> del teclado para esquivar los meteoros."
-         data-mobile="<b>Toca y arrastra</b> a izquierda o derecha para mover la nave y evitar ser impactado.">
+
+      <a href="pages/meteor.html" class="game-card" style="--accent: #FF9900;"
+         data-title="Meteor Dash" data-icon="bx-rocket"
+         data-goal="Pilota tu nave a través de una lluvia de meteoros infinita. Esquiva todo lo que puedas para sobrevivir el mayor tiempo posible."
+         data-pc="Usa las <b>Flechas Izquierda / Derecha</b> del teclado para mover la nave y esquivar."
+         data-mobile="<b>Toca y arrastra</b> a izquierda o derecha para mover la nave y evitar los impactos.">
         <div class="card-inner">
           <div class="icon-placeholder">
-            <i class='bx bxs-planet'></i>
+            <i class='bx bx-rocket'></i>
           </div>
           <h2>Meteor Dash</h2>
           <p>Esquiva meteoros y sobrevive</p>
@@ -95,8 +101,9 @@
 
       <a href="pages/neonbreaker.html" class="game-card" style="--accent: #FF66CC;"
          data-title="Neon Breaker" data-icon="bx-shape-square"
-         data-pc="Mueve el <b>ratón</b> para controlar la paleta y mantener la pelota rebotando sobre los bloques."
-         data-mobile="<b>Desliza el dedo</b> horizontalmente para mover la paleta y destruir todos los bloques.">
+         data-goal="Destruye todos los bloques de neón haciendo rebotar la pelota con tu paleta. ¡Mantén la pelota en juego a toda costa!"
+         data-pc="Mueve el <b>ratón</b> de izquierda a derecha para controlar la paleta y rebotar la pelota."
+         data-mobile="<b>Desliza el dedo</b> horizontalmente por la parte inferior para mover la paleta.">
         <div class="card-inner">
           <div class="icon-placeholder">
             <i class='bx bx-shape-square'></i>
@@ -121,6 +128,10 @@
       </div>
       
       <div class="modal-body">
+        <div class="instruction-box goal-box">
+          <h3><i class='bx bx-target-lock'></i> Objetivo</h3>
+          <p id="modal-goal-text">Objetivo del juego</p>
+        </div>
         <div class="instruction-box">
           <h3><i class='bx bx-laptop'></i> En PC</h3>
           <p id="modal-pc-text">Instrucciones PC</p>
@@ -148,6 +159,7 @@
     const modalTitle = document.getElementById('modal-title');
     const modalIcon = document.getElementById('modal-icon');
     const modalAccent = document.getElementById('modal-accent');
+    const modalGoalText = document.getElementById('modal-goal-text');
     const modalPcText = document.getElementById('modal-pc-text');
     const modalMobileText = document.getElementById('modal-mobile-text');
 
@@ -159,6 +171,7 @@
         // Grab data-attributes
         const title = card.getAttribute('data-title');
         const iconClass = card.getAttribute('data-icon');
+        const goalText = card.getAttribute('data-goal');
         const pcText = card.getAttribute('data-pc');
         const mobileText = card.getAttribute('data-mobile');
         const href = card.getAttribute('href');
@@ -167,6 +180,7 @@
         // Apply data to modal
         modalTitle.textContent = title;
         modalIcon.className = `bx ${iconClass}`;
+        modalGoalText.innerHTML = goalText;
         modalPcText.innerHTML = pcText;
         modalMobileText.innerHTML = mobileText;
         playBtn.href = href;
@@ -177,8 +191,9 @@
         
         // Determine icons colors based on game roughly
         const boxes = document.querySelectorAll('.instruction-box h3');
-        if(boxes.length > 0) boxes[0].style.color = '#00E5FF'; // PC
-        if(boxes.length > 1) boxes[1].style.color = '#FFD700'; // Mobile
+        if(boxes.length > 0) boxes[0].style.color = '#FF3366'; // Objetivo
+        if(boxes.length > 1) boxes[1].style.color = '#00E5FF'; // PC
+        if(boxes.length > 2) boxes[2].style.color = '#FFD700'; // Mobile
 
         // Show Modal
         modal.classList.add('show');
@@ -191,6 +206,10 @@
 
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeModalFn();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModalFn();
     });
   </script>
 </body>

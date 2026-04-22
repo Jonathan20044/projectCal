@@ -59,7 +59,6 @@ canvas.height = window.innerHeight;
 
 const ctx = canvas.getContext("2d");
 
-const introductionElement = document.getElementById("introduction");
 const perfectElement = document.getElementById("perfect");
 const restartButton = document.getElementById("restart");
 const scoreElement = document.getElementById("score");
@@ -85,7 +84,6 @@ function resetGame(resetLives = false) {
   localStorage.setItem("stickHeroLives", lives);
   updateLivesDisplay();
 
-  introductionElement.style.opacity = 1;
   perfectElement.style.opacity = 0;
   restartButton.style.display = "none";
   scoreElement.innerText = score;
@@ -136,7 +134,7 @@ function hideStartOverlay() {
 }
 
 function runStartCountdown(onDone) {
-  if (!startOverlay || startCountdownActive || startUnlocked) {
+  if (!startOverlay || startCountdownActive) {
     return;
   }
 
@@ -236,18 +234,39 @@ function generatePlatform() {
 }
 
 window.addEventListener("keydown", function (event) {
-  var m = document.getElementById("menu-confirm-modal");
-  if (m && m.classList.contains("is-visible")) return;
   if (event.key == " ") {
+    if (event.target.tagName === "BUTTON" || event.target.closest("button") ||
+        event.target.tagName === "A" || event.target.closest("a")) return;
+        
+    var m = document.getElementById("menu-confirm-modal");
+    if (m && m.classList.contains("is-visible")) return;
+    var q = document.getElementById("question-modal");
+    if (q && q.classList.contains("is-visible")) return;
+
     if (!ensureStartUnlocked()) {
       event.preventDefault();
       return;
     }
 
     event.preventDefault();
-    hideStartOverlay();
-    resetGame(true);
-    return;
+
+    if (phase == "waiting") {
+      hideStartOverlay();
+      saveCheckpointState();
+      lastTimestamp = undefined;
+      phase = "stretching";
+      window.requestAnimationFrame(animate);
+    } else if (phase == "stretching") {
+      // Spacebar is already down, do nothing (it will turn to 'turning' on keyup)
+    }
+  }
+});
+
+window.addEventListener("keyup", function (event) {
+  if (event.key == " ") {
+    if (phase == "stretching") {
+      phase = "turning";
+    }
   }
 });
 
@@ -267,7 +286,6 @@ window.addEventListener("mousedown", function (event) {
     hideStartOverlay();
     saveCheckpointState();
     lastTimestamp = undefined;
-    introductionElement.style.opacity = 0;
     phase = "stretching";
     window.requestAnimationFrame(animate);
   }
@@ -289,7 +307,6 @@ window.addEventListener("touchstart", function (event) {
     hideStartOverlay();
     saveCheckpointState();
     lastTimestamp = undefined;
-    introductionElement.style.opacity = 0;
     phase = "stretching";
     window.requestAnimationFrame(animate);
   }
@@ -758,7 +775,6 @@ function restoreCheckpointState(state) {
   phase = "waiting";
   lastTimestamp = undefined;
 
-  introductionElement.style.opacity = 1;
   perfectElement.style.opacity = 0;
   restartButton.style.display = "none";
   scoreElement.innerText = score;
@@ -769,32 +785,39 @@ function restoreCheckpointState(state) {
 function initializeGame() {
   const restart = localStorage.getItem("stickHeroRestart") === "true";
   const paused = localStorage.getItem("stickHeroPaused") === "true";
+  const resumeOk = localStorage.getItem("stickHeroResumeOk") === "true";
   const savedStateRaw = localStorage.getItem("stickHeroCheckpointState");
 
   if (restart) {
     localStorage.removeItem("stickHeroRestart");
     localStorage.removeItem("stickHeroPaused");
+    localStorage.removeItem("stickHeroResumeOk");
     localStorage.removeItem("stickHeroCheckpointState");
     resetGame(true);
     return;
   }
 
   if (paused && savedStateRaw) {
-    let savedState;
-    try {
-      savedState = JSON.parse(savedStateRaw);
-    } catch (error) {
-      savedState = null;
+    if (resumeOk) {
+      let savedState;
+      try {
+        savedState = JSON.parse(savedStateRaw);
+      } catch (error) {
+        savedState = null;
+      }
+
+      if (savedState) {
+        localStorage.removeItem("stickHeroPaused");
+        localStorage.removeItem("stickHeroResumeOk");
+        localStorage.removeItem("stickHeroCheckpointState");
+        restoreCheckpointState(savedState);
+        return;
+      }
     }
 
-    if (savedState) {
-      localStorage.removeItem("stickHeroPaused");
-      localStorage.removeItem("stickHeroCheckpointState");
-      restoreCheckpointState(savedState);
-      return;
-    }
-
+    // If it was paused but no resumeOk (or invalid state), it's a cheat attempt or fail
     localStorage.removeItem("stickHeroPaused");
+    localStorage.removeItem("stickHeroResumeOk");
     localStorage.removeItem("stickHeroCheckpointState");
   }
 
