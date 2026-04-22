@@ -958,24 +958,11 @@ var PACMAN = (function () {
   function showQuestionModal() {
     var modal = document.getElementById("question-modal");
     if (!modal) {
-      return false;
+      return;
     }
-
-    // Force all visibility properties to bypass CSS caching on mobile
-    modal.style.display = "flex";
-    modal.style.visibility = "visible";
-    modal.style.opacity = "1";
-    modal.style.zIndex = "99999";
-    modal.style.pointerEvents = "auto";
     modal.classList.add("is-visible");
     modal.setAttribute("aria-hidden", "false");
-
     questionActive = true;
-
-    // Force a layout recalculation to ensure mobile browsers render the modal
-    void modal.offsetHeight;
-
-    return true;
   }
 
   function hideStartOverlay() {
@@ -1153,73 +1140,18 @@ var PACMAN = (function () {
 
     hideStartOverlay();
     killCountdown();
-    setState(PAUSE);
+
+    setState(WAITING);
     user.loseLife();
 
     audio.pause();
     map.draw(ctx);
 
     dialog("Responde la pregunta");
+    setState(PAUSE);
 
     saveResumeState();
-
-    var modalShown = showQuestionModal();
-
-    // First attempt: check if modal showed successfully
-    if (!modalShown) {
-      // Modal doesn't exist, redirect immediately
-      try {
-        window.location.href = "questions.html?source=pacman";
-      } catch (e) {
-        // Fallback if navigation fails
-        window.open("questions.html?source=pacman", "_self");
-      }
-      return;
-    }
-
-    // Safety net 1: Check if modal is actually visible after short delay
-    // Increased from 500ms to 800ms for mobile paint cycles
-    window.setTimeout(function () {
-      if (!questionActive) {
-        return; // Already handled
-      }
-      var modal = document.getElementById("question-modal");
-      var isVisible =
-        modal &&
-        (modal.classList.contains("is-visible") ||
-          modal.style.visibility === "visible" ||
-          modal.style.display !== "none");
-
-      if (!isVisible) {
-        try {
-          window.location.href = "questions.html?source=pacman";
-        } catch (e) {
-          window.open("questions.html?source=pacman", "_self");
-        }
-      }
-    }, 800);
-
-    // Safety net 2: Ultimate fallback after 4 seconds - force redirect
-    // This handles cases where modal is stuck rendering
-    window.setTimeout(function () {
-      if (!questionActive) {
-        return; // User answered the question
-      }
-      var modal = document.getElementById("question-modal");
-      if (
-        modal &&
-        modal.style.display === "block" &&
-        modal.style.visibility === "visible"
-      ) {
-        // Modal is still showing - user might be reading/thinking, don't force redirect
-        return;
-      }
-      try {
-        window.location.href = "questions.html?source=pacman";
-      } catch (e) {
-        window.open("questions.html?source=pacman", "_self");
-      }
-    }, 4000);
+    showQuestionModal();
   }
 
   function setState(nState) {
