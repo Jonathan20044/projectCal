@@ -106,6 +106,7 @@
   const removeUnlockListeners = () => {
     const events = ["pointerdown", "touchstart", "touchend", "mousedown", "click", "keydown"];
     events.forEach((evt) => {
+      window.removeEventListener(evt, handleUnlock, { capture: true });
       document.removeEventListener(evt, handleUnlock, { capture: true });
     });
   };
@@ -132,13 +133,8 @@
   const setupListeners = () => {
     const events = ["pointerdown", "touchstart", "touchend", "mousedown", "click", "keydown"];
     events.forEach((evt) => {
+      window.addEventListener(evt, handleUnlock, { capture: true });
       document.addEventListener(evt, handleUnlock, { capture: true });
-    });
-    
-    document.addEventListener("click", () => {
-      if (audioCtx && audioCtx.state === "suspended") {
-        audioCtx.resume();
-      }
     });
   };
 
