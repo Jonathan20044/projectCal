@@ -1417,6 +1417,30 @@ var PACMAN = (function () {
       passive: false,
     });
 
+    // ── iOS Safari specific fix ──
+    // iOS requiere una interacción del usuario antes de reproducir audio
+    var overlay = document.getElementById("start-overlay");
+    if (overlay) {
+      overlay.addEventListener("click", function iosSafariUnlock(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Intenta reproducir un sonido silencioso para "desbloquear" el audio
+        if (audio && audio.files && audio.files.start) {
+          try {
+            audio.files.start.play().catch(function() {
+              // Ignorar errores silenciosamente
+            });
+            audio.files.start.pause();
+            audio.files.start.currentTime = 0;
+          } catch (err) {}
+        }
+        // Ahora inicia el juego
+        if (state === WAITING && !startCountdownActive) {
+          startNewGame();
+        }
+      }, { passive: false, once: false });
+    }
+
     if (timer) {
       window.clearInterval(timer);
     }
