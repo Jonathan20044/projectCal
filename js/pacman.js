@@ -1397,6 +1397,7 @@ var PACMAN = (function () {
     if (startTapHandler) {
       document.removeEventListener("mousedown", startTapHandler, false);
       document.removeEventListener("touchstart", startTapHandler, false);
+      document.removeEventListener("click", startTapHandler, false);
     }
 
     startTapHandler = function handleStartTap(e) {
@@ -1408,37 +1409,51 @@ var PACMAN = (function () {
         if (e.cancelable) {
           e.preventDefault();
         }
+        e.stopPropagation();
         startNewGame();
       }
     };
 
     document.addEventListener("mousedown", startTapHandler, false);
+    document.addEventListener("click", startTapHandler, false);
     document.addEventListener("touchstart", startTapHandler, {
       passive: false,
+      capture: false
     });
 
-    // ── iOS Safari specific fix ──
-    // iOS requiere una interacción del usuario antes de reproducir audio
+    // ── iOS Safari specific fix - Direct overlay listener ──
     var overlay = document.getElementById("start-overlay");
     if (overlay) {
-      overlay.addEventListener("click", function iosSafariUnlock(e) {
+      // Remove old listeners if they exist
+      overlay.removeEventListener("click", startNewGameDirectly, false);
+      overlay.removeEventListener("touchstart", startNewGameDirectly, false);
+      
+      function startNewGameDirectly(e) {
         e.preventDefault();
         e.stopPropagation();
-        // Intenta reproducir un sonido silencioso para "desbloquear" el audio
-        if (audio && audio.files && audio.files.start) {
+        
+        // Desbloquear audio
+        if (audio && audio.files) {
           try {
-            audio.files.start.play().catch(function() {
-              // Ignorar errores silenciosamente
-            });
-            audio.files.start.pause();
-            audio.files.start.currentTime = 0;
+            for (var key in audio.files) {
+              if (audio.files[key]) {
+                audio.files[key].play().catch(function() {});
+                audio.files[key].pause();
+                audio.files[key].currentTime = 0;
+              }
+            }
           } catch (err) {}
         }
-        // Ahora inicia el juego
+        
         if (state === WAITING && !startCountdownActive) {
           startNewGame();
         }
-      }, { passive: false, once: false });
+      }
+      
+      overlay.addEventListener("click", startNewGameDirectly, false);
+      overlay.addEventListener("touchstart", startNewGameDirectly, { passive: false });
+      overlay.style.cursor = "pointer";
+      overlay.style.zIndex = "9999";
     }
 
     if (timer) {
