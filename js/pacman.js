@@ -891,56 +891,44 @@ var PACMAN = (function () {
     questionActive = false,
     safeUntilTick = 0,
     startTapHandler = null,
-    startTapWrapper = null,
-    startTapOverlay = null,
+    startOverlayTapHandler = null,
     startCountdownActive = false,
     startCountdownTimer = null;
 
   function runStartCountdown(onDone) {
     var overlay = document.getElementById("start-overlay");
     if (!overlay || startCountdownActive) return;
-    
-    startCountdownActive = true;
+
+    var icon = overlay.querySelector(".start-message i");
+    var message = overlay.querySelector(".start-message p");
+    var baseText = "Toca o haz clic para iniciar";
     var count = 3;
-    
+
+    startCountdownActive = true;
     if (overlay) {
       overlay.classList.add("is-visible");
       overlay.setAttribute("aria-hidden", "false");
     }
-    
-    // Mostrar el contador
-    var icon = overlay.querySelector(".start-message i");
-    var message = overlay.querySelector(".start-message p");
-    
     if (icon) icon.style.display = "none";
-    if (message) {
-      message.textContent = count;
-      message.style.fontSize = "3em";
-      message.style.fontWeight = "bold";
-    }
-    
+    if (message) message.textContent = "Inicia en " + count;
     startCountdownTimer = window.setInterval(function () {
       count -= 1;
-      
+
       if (count > 0) {
-        if (message) message.textContent = count;
+        if (message) message.textContent = "Inicia en " + count;
         return;
       }
-      
-      // Countdown finished
+
       window.clearInterval(startCountdownTimer);
       startCountdownTimer = null;
       startCountdownActive = false;
-      
-      // Reset overlay
+
       if (icon) icon.style.display = "";
-      if (message) {
-        message.textContent = "Toca o haz clic para iniciar";
-        message.style.fontSize = "";
-        message.style.fontWeight = "";
+      if (message) message.textContent = baseText;
+      if (overlay) {
+        overlay.classList.remove("is-visible");
+        overlay.setAttribute("aria-hidden", "true");
       }
-      if (overlay) overlay.classList.remove("is-visible");
-      
       onDone();
     }, 1000);
   }
@@ -1044,7 +1032,7 @@ var PACMAN = (function () {
       ghosts[i].reset();
     }
     audio.play("start");
-    runStartCountdown(function() {
+    runStartCountdown(function () {
       timerStart = tick;
       safeUntilTick = tick + Pacman.FPS * 2;
       setState(PLAYING);
@@ -1100,6 +1088,7 @@ var PACMAN = (function () {
     var overlay = document.getElementById("start-overlay");
     if (overlay) {
       overlay.classList.remove("is-visible");
+      overlay.setAttribute("aria-hidden", "true");
       var icon = overlay.querySelector(".start-message i");
       var message = overlay.querySelector(".start-message p");
       if (icon) icon.style.display = "";
@@ -1136,7 +1125,7 @@ var PACMAN = (function () {
     wasCountdownWhenMenuOpened = false;
     menuPausedFromState = null;
     map.draw(ctx);
-    runStartCountdown(function() {
+    runStartCountdown(function () {
       audio.resume();
       timerStart = tick;
       safeUntilTick = tick + Pacman.FPS * 2;
@@ -1145,14 +1134,20 @@ var PACMAN = (function () {
   });
 
   function loseLife() {
-    setState(WAITING);
+    if (questionActive) {
+      return;
+    }
+
+    questionActive = true;
+    hideStartOverlay();
+    killCountdown();
+    setState(PAUSE);
     user.loseLife();
 
     audio.pause();
     map.draw(ctx);
 
     dialog("Responde la pregunta");
-    setState(PAUSE);
 
     saveResumeState();
     showQuestionModal();
@@ -1193,7 +1188,6 @@ var PACMAN = (function () {
       map.width * map.blockSize - levelWidth - map.blockSize * 0.5,
       textBase,
     );
-
   }
 
   function redrawBlock(pos) {
@@ -1336,7 +1330,7 @@ var PACMAN = (function () {
           Math.min(viewport.width / gameCols, viewport.height / gameRows),
         ),
       ),
-    canvas = document.createElement("canvas");
+      canvas = document.createElement("canvas");
 
     canvas.setAttribute("width", blockSize * gameCols + "px");
     canvas.setAttribute("height", blockSize * gameRows + "px");
@@ -1433,6 +1427,9 @@ var PACMAN = (function () {
       }
       var m = document.getElementById("menu-confirm-modal");
       if (m && m.classList.contains("is-visible")) return;
+      var q = document.getElementById("question-modal");
+      if (q && q.classList.contains("is-visible")) return;
+      if (questionActive) return;
 
       if (state === WAITING && !startCountdownActive) {
         if (e.cancelable) {
@@ -1447,40 +1444,31 @@ var PACMAN = (function () {
     document.addEventListener("click", startTapHandler, false);
     document.addEventListener("touchstart", startTapHandler, {
       passive: false,
-      capture: false
+      capture: false,
     });
 
     // ── iOS Safari specific fix - Direct overlay listener ──
     var overlay = document.getElementById("start-overlay");
     if (overlay) {
-      // Remove old listeners if they exist
-      overlay.removeEventListener("click", startNewGameDirectly, false);
-      overlay.removeEventListener("touchstart", startNewGameDirectly, false);
-      
-      function startNewGameDirectly(e) {
+      if (startOverlayTapHandler) {
+        overlay.removeEventListener("click", startOverlayTapHandler, false);
+        overlay.removeEventListener(
+          "touchstart",
+          startOverlayTapHandler,
+          false,
+        );
+      }
+
+      startOverlayTapHandler = function startNewGameDirectly(e) {
         e.preventDefault();
         e.stopPropagation();
-        
-        // Desbloquear audio
-        if (audio && audio.files) {
-          try {
-            for (var key in audio.files) {
-              if (audio.files[key]) {
-                audio.files[key].play().catch(function() {});
-                audio.files[key].pause();
-                audio.files[key].currentTime = 0;
-              }
-            }
-          } catch (err) {}
-        }
-        
-        if (state === WAITING && !startCountdownActive) {
-          startNewGame();
-        }
-      }
-      
-      overlay.addEventListener("click", startNewGameDirectly, false);
-      overlay.addEventListener("touchstart", startNewGameDirectly, { passive: false });
+        tryStartGame();
+      };
+
+      overlay.addEventListener("click", startOverlayTapHandler, false);
+      overlay.addEventListener("touchstart", startOverlayTapHandler, {
+        passive: false,
+      });
       overlay.style.cursor = "pointer";
       overlay.style.zIndex = "9999";
     }
@@ -1538,6 +1526,14 @@ var PACMAN = (function () {
     if (startTapHandler) {
       document.removeEventListener("mousedown", startTapHandler, false);
       document.removeEventListener("touchstart", startTapHandler, false);
+      document.removeEventListener("click", startTapHandler, false);
+    }
+
+    var overlay = document.getElementById("start-overlay");
+    if (overlay && startOverlayTapHandler) {
+      overlay.removeEventListener("click", startOverlayTapHandler, false);
+      overlay.removeEventListener("touchstart", startOverlayTapHandler, false);
+      startOverlayTapHandler = null;
     }
 
     if (audio) {
@@ -1546,15 +1542,14 @@ var PACMAN = (function () {
   }
 
   function tryStartGame() {
-    var overlay = document.getElementById("start-overlay");
-    if (overlay) {
-      overlay.classList.remove("is-visible");
-      overlay.setAttribute("aria-hidden", "true");
-    }
-
     if (!ctx || !user || !map) {
       if (typeof initPacmanPage === "function") initPacmanPage();
       if (!ctx || !user || !map) return false;
+    }
+
+    var q = document.getElementById("question-modal");
+    if (q && q.classList.contains("is-visible")) {
+      return false;
     }
 
     if (state === WAITING && !startCountdownActive && !questionActive) {
@@ -1583,7 +1578,7 @@ var PACMAN = (function () {
       if (typeof keyDown === "function") {
         keyDown(fakeEvent);
       }
-    }
+    },
   };
 })();
 
@@ -1979,7 +1974,12 @@ function handleTouchStart(evt) {
   var inModal = false;
   while (target && target !== document.body) {
     if (target.nodeName === "A" || target.nodeName === "BUTTON") return;
-    if (target.classList && target.classList.contains("modal-overlay") && target.id !== "start-overlay") return;
+    if (
+      target.classList &&
+      target.classList.contains("modal-overlay") &&
+      target.id !== "start-overlay"
+    )
+      return;
     target = target.parentNode;
   }
 
@@ -2057,7 +2057,12 @@ document.addEventListener("touchmove", handleTouchMove, passiveOpt);
     var target = e.target;
     while (target && target !== document.body) {
       if (target.nodeName === "A" || target.nodeName === "BUTTON") return;
-      if (target.classList && target.classList.contains("modal-overlay") && target.id !== "start-overlay") return;
+      if (
+        target.classList &&
+        target.classList.contains("modal-overlay") &&
+        target.id !== "start-overlay"
+      )
+        return;
       target = target.parentNode;
     }
 
