@@ -621,9 +621,12 @@ function runStartCountdown(onDone) {
 }
 
 function beginGameFromTap(event) {
-  if (event.target.tagName === "BUTTON" || event.target.closest("button") || event.target.tagName === "A") return;
+  if (event.target.tagName === "BUTTON" || event.target.closest("button") ||
+      event.target.tagName === "A" || event.target.closest("a")) return;
   var m = document.getElementById("menu-confirm-modal");
   if (m && m.classList.contains("is-visible")) return;
+  var q = document.getElementById("question-modal");
+  if (q && q.classList.contains("is-visible")) return;
 
   if (event.cancelable) event.preventDefault();
   event.stopPropagation();
@@ -701,20 +704,14 @@ window.addEventListener("arcade:menu-open", () => {
 window.addEventListener("arcade:menu-close", () => {
   if (!isMenuPaused) return;
   isMenuPaused = false;
-  if (wasCountdownWhenMenuOpened && !gameStarted) {
-    wasCountdownWhenMenuOpened = false;
-    // They hadn't started yet - show the start overlay again
+  wasCountdownWhenMenuOpened = false;
+  if (exitingToMenu) return;
+
+  if (!gameStarted) {
+    // Game hasn't started yet — restore start overlay
     showStartOverlay();
-  } else if (wasCountdownWhenMenuOpened && gameStarted) {
-    wasCountdownWhenMenuOpened = false;
-    runStartCountdown(() => {
-      if (exitingToMenu) return;
-      running = true;
-      lastTs = 0;
-      frameId = requestAnimationFrame(loop);
-    });
   } else {
-    wasCountdownWhenMenuOpened = false;
+    // Game was running — resume with countdown
     runStartCountdown(() => {
       if (exitingToMenu) return;
       running = true;

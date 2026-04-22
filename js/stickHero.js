@@ -252,9 +252,12 @@ window.addEventListener("keydown", function (event) {
 });
 
 window.addEventListener("mousedown", function (event) {
-  if (event.target.tagName === "BUTTON" || event.target.closest("button") || event.target.tagName === "A") return;
+  if (event.target.tagName === "BUTTON" || event.target.closest("button") ||
+      event.target.tagName === "A" || event.target.closest("a")) return;
   var m = document.getElementById("menu-confirm-modal");
   if (m && m.classList.contains("is-visible")) return;
+  var q = document.getElementById("question-modal");
+  if (q && q.classList.contains("is-visible")) return;
 
   if (!ensureStartUnlocked()) {
     return;
@@ -271,9 +274,12 @@ window.addEventListener("mousedown", function (event) {
 });
 
 window.addEventListener("touchstart", function (event) {
-  if (event.target.tagName === "BUTTON" || event.target.closest("button") || event.target.tagName === "A") return;
+  if (event.target.tagName === "BUTTON" || event.target.closest("button") ||
+      event.target.tagName === "A" || event.target.closest("a")) return;
   var m = document.getElementById("menu-confirm-modal");
   if (m && m.classList.contains("is-visible")) return;
+  var q = document.getElementById("question-modal");
+  if (q && q.classList.contains("is-visible")) return;
 
   if (!ensureStartUnlocked()) {
     return;
@@ -340,18 +346,24 @@ window.addEventListener("arcade:menu-open", function () {
 window.addEventListener("arcade:menu-close", function () {
   if (!isMenuPaused) return;
   isMenuPaused = false;
-  if (wasCountdownWhenMenuOpened) {
-    wasCountdownWhenMenuOpened = false;
-    // Restart the initial start countdown
-    runStartCountdown();
+  wasCountdownWhenMenuOpened = false;
+
+  if (!startUnlocked && phase === "waiting") {
+    // Game hasn't started yet — restore start overlay so user can tap to begin
+    if (startOverlay) {
+      var icon = startOverlay.querySelector(".start-message i");
+      var message = startOverlay.querySelector(".start-message p");
+      if (icon) icon.style.display = "";
+      if (message) message.textContent = "Toca o haz clic para iniciar";
+      startOverlay.classList.add("is-visible");
+      startOverlay.setAttribute("aria-hidden", "false");
+    }
   } else if (phase !== "waiting") {
-    wasCountdownWhenMenuOpened = false;
+    // Game was in progress — resume with countdown
     runStartCountdown(function() {
       lastTimestamp = undefined;
       window.requestAnimationFrame(animate);
     });
-  } else {
-    wasCountdownWhenMenuOpened = false;
   }
 });
 

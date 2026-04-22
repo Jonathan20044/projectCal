@@ -119,11 +119,14 @@ window.addEventListener("arcade:menu-open", () => {
 window.addEventListener("arcade:menu-close", () => {
   if (!isMenuPaused) return;
   isMenuPaused = false;
-  if (wasCountdownWhenMenuOpened && !gameStarted) {
-    wasCountdownWhenMenuOpened = false;
+  wasCountdownWhenMenuOpened = false;
+  if (exitingToMenu) return;
+
+  if (!gameStarted) {
+    // Game hasn't started yet — restore start overlay
     startOverlay.classList.add('is-visible');
   } else {
-    wasCountdownWhenMenuOpened = false;
+    // Game was running — resume with countdown
     runStartCountdown(() => {
       if (exitingToMenu) return;
       running = true;
@@ -588,9 +591,12 @@ function showQuestionModal() {
 const startOverlay = document.getElementById('start-overlay');
 
 function beginGame(e) {
-  if (e && (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A")) return;
+  if (e && (e.target.tagName === "BUTTON" || e.target.closest("button") ||
+            e.target.tagName === "A" || e.target.closest("a"))) return;
   var m = document.getElementById("menu-confirm-modal");
   if (m && m.classList.contains("is-visible")) return;
+  var q = document.getElementById("question-modal");
+  if (q && q.classList.contains("is-visible")) return;
 
   exitingToMenu = false;
   if (gameStarted || startCountdownActive) return;
@@ -607,9 +613,12 @@ function beginGame(e) {
 
 startOverlay.addEventListener('click', beginGame);
 startOverlay.addEventListener('touchstart', (e) => {
-  if (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A") return;
+  if (e.target.tagName === "BUTTON" || e.target.closest("button") ||
+      e.target.tagName === "A" || e.target.closest("a")) return;
   var m = document.getElementById("menu-confirm-modal");
   if (m && m.classList.contains("is-visible")) return;
+  var q = document.getElementById("question-modal");
+  if (q && q.classList.contains("is-visible")) return;
   if (e.cancelable) e.preventDefault();
   beginGame(e);
 }, { passive: false });

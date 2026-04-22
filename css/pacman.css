@@ -285,7 +285,7 @@ a {
   font-weight: bold;
   font-size: 0.9rem;
   cursor: pointer;
-  z-index: 3000;
+  z-index: 100001; /* always above any modal-overlay */
 
   box-shadow: 0 5px 15px rgba(0,0,0,0.4), 0 0 10px rgba(255,215,0,0.3);
   transition: all 0.3s ease;
@@ -299,4 +299,14 @@ a {
 
 #btn-menu:active {
   transform: scale(0.95);
+}
+
+/* start-overlay must not block the menu button */
+#start-overlay {
+  pointer-events: auto;
+}
+
+#start-overlay ~ #btn-menu,
+body > #btn-menu {
+  pointer-events: auto !important;
 }

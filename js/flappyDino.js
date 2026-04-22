@@ -599,17 +599,23 @@ document.addEventListener("keydown", function (e) {
 });
 
 document.addEventListener("touchstart", function (e) {
-  if (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A") return;
+  if (e.target.tagName === "BUTTON" || e.target.closest("button") ||
+      e.target.tagName === "A" || e.target.closest("a")) return;
   var m = document.getElementById("menu-confirm-modal");
   if (m && m.classList.contains("is-visible")) return;
+  var q = document.getElementById("question-modal");
+  if (q && q.classList.contains("is-visible")) return;
   if (e.cancelable) e.preventDefault();
   playerInput();
 }, { passive: false });
 
 document.addEventListener("mousedown", function (e) {
-  if (e.target.tagName === "BUTTON" || e.target.closest("button") || e.target.tagName === "A") return;
+  if (e.target.tagName === "BUTTON" || e.target.closest("button") ||
+      e.target.tagName === "A" || e.target.closest("a")) return;
   var m = document.getElementById("menu-confirm-modal");
   if (m && m.classList.contains("is-visible")) return;
+  var q = document.getElementById("question-modal");
+  if (q && q.classList.contains("is-visible")) return;
   e.preventDefault();
   playerInput();
 });
@@ -718,24 +724,35 @@ window.addEventListener("arcade:menu-open", function () {
 });
 
 window.addEventListener("arcade:menu-close", function () {
-  if (gameOver || !isMenuPaused) return;
+  if (!isMenuPaused) return;
   isMenuPaused = false;
-  if (wasCountdownWhenMenuOpened && !start) {
-    wasCountdownWhenMenuOpened = false;
+  wasCountdownWhenMenuOpened = false;
+
+  // Never auto-start the game when closing the menu.
+  // Just resume the animation loop and restore the start overlay if needed.
+  if (exitingToMenu) return;
+
+  if (!start) {
+    // Game hasn't started yet — show the "tap to start" overlay again
+    // so the user can consciously choose when to begin.
+    var overlay = document.getElementById("start-overlay");
+    if (overlay) {
+      var icon = overlay.querySelector(".start-message i");
+      var message = overlay.querySelector(".start-message p");
+      if (icon) icon.style.display = "";
+      if (message) message.textContent = "Toca o haz clic para iniciar";
+      overlay.classList.add("is-visible");
+      overlay.setAttribute("aria-hidden", "false");
+    }
+    // Resume background animation loop
+    if (updateFrameId === null && !gameOver) {
+      updateFrameId = window.requestAnimationFrame(update);
+    }
+  } else if (!gameOver) {
+    // Game was running — resume with a brief countdown
     runStartCountdown(function() {
-      if (exitingToMenu || start) return;
-      start = true;
-      velocity = lift;
-      dinoAngle = -20;
-      var ctrl = document.getElementById("ctrl-ctn");
-      if (ctrl) ctrl.style.opacity = 0;
-      hideStartOverlay();
-    });
-  } else {
-    wasCountdownWhenMenuOpened = false;
-    runStartCountdown(function() {
-      if (!gameOver && !exitingToMenu) {
-         updateFrameId = window.requestAnimationFrame(update);
+      if (!gameOver && !exitingToMenu && updateFrameId === null) {
+        updateFrameId = window.requestAnimationFrame(update);
       }
     });
   }
