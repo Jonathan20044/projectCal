@@ -5,7 +5,7 @@ let COLS, ROWS;
 // ── CANVAS SETUP ────────────────────────────────────────
 const canvas = document.getElementById('snake-canvas');
 const ctx = canvas.getContext('2d');
-
+// Make canvas fill the window and calculate grid size
 function resizeCanvas() {
   const w = window.innerWidth;
   const h = window.innerHeight;
